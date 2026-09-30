@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+  <defs>
+    <radialGradient id="wax" cx="38%" cy="30%" r="72%">
+      <stop offset="0" stop-color="#f04a3e"/>
+      <stop offset=".45" stop-color="#da291c"/>
+      <stop offset="1" stop-color="#aa170f"/>
+    </radialGradient>
+    <filter id="texture">
+      <feTurbulence baseFrequency=".85" numOctaves="2" seed="4" type="fractalNoise" result="noise"/>
+      <feComposite in="noise" in2="SourceGraphic" operator="in" result="grain"/>
+      <feBlend in="SourceGraphic" in2="grain" mode="soft-light"/>
+    </filter>
+  </defs>
+  <path fill="url(#wax)" filter="url(#texture)" d="M60 5c6 0 10 5 15 7 6 1 13-2 18 2 5 3 4 11 8 16 3 5 11 7 12 13 2 6-4 11-4 17s6 11 4 17c-1 6-9 8-12 13-4 5-3 13-8 16-5 4-12 1-18 2-5 2-9 7-15 7s-10-5-15-7c-6-1-13 2-18-2-5-3-4-11-8-16-3-5-11-7-12-13-2-6 4-11 4-17S5 49 7 43c1-6 9-8 12-13 4-5 3-13 8-16 5-4 12-1 18-2 5-2 9-7 15-7Z"/>
+  <circle cx="60" cy="60" r="39" fill="none" stroke="#8e130d" stroke-opacity=".45" stroke-width="3"/>
+  <circle cx="60" cy="60" r="34" fill="#c52117" fill-opacity=".3" stroke="#f2655c" stroke-opacity=".32"/>
+  <g fill="none" stroke="#8f160f" stroke-linecap="round" stroke-width="5" opacity=".72">
+    <path d="M41 69c9-15 22-23 38-23"/>
+    <path d="m67 37 13 9-10 13"/>
+    <path d="M42 76h37"/>
+  </g>
+  <path d="M29 34c8-11 18-17 29-19" fill="none" stroke="#ff746a" stroke-linecap="round" stroke-opacity=".45" stroke-width="4"/>
+</svg>
