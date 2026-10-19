@@ -72,13 +72,13 @@ h1,h2,h3,p{margin-top:0}
 .event-title-year{display:block;margin-bottom:10px;color:var(--red);font-size:.55em;letter-spacing:-.03em}
 .event-title-name{display:block;white-space:nowrap}
 .event-title-dot{color:var(--red)}
-.hero h1{margin-bottom:32px;font-size:clamp(36px,4.5vw,66px);line-height:1.15;letter-spacing:-.055em;word-break:keep-all;text-wrap:balance}
+.hero h1{margin-bottom:32px;font-size:clamp(18px,2.25vw,33px);line-height:1.15;letter-spacing:-.055em;word-break:keep-all;text-wrap:balance}
 .hero h1 span{display:block}
-.hero-description{max-width:590px;color:var(--muted);font-size:clamp(16px,1.5vw,20px);line-height:1.8;word-break:keep-all;text-wrap:pretty}
+.hero-description{max-width:590px;color:var(--muted);font-size:clamp(8px,.75vw,10px);line-height:1.8;word-break:keep-all;text-wrap:pretty}
 .primary-button{margin-top:22px;padding:16px 22px;border:0;border-radius:2px;background:var(--ink);color:#fff;font-weight:700}
 .primary-button span{margin-left:30px;color:#ff6a5e}
 .hero-date{position:relative;padding:34px 0 18px;border-top:5px solid var(--red);border-bottom:1px solid var(--ink)}
-.hero-date strong{display:block;font:700 clamp(42px,5vw,72px)/1 "DM Sans"}
+.hero-date strong{display:block;font:700 clamp(21px,2.5vw,36px)/1 "DM Sans"}
 .date-year,.date-place{display:block;color:var(--muted);font:600 12px "DM Sans";letter-spacing:.12em}
 .date-year{margin-bottom:22px}
 .date-place{margin-top:24px}
@@ -134,7 +134,7 @@ footer{display:flex;justify-content:space-between;padding:28px clamp(24px,5vw,76
 .nav-link{text-align:left}
 .page{min-height:calc(100vh - 68px);padding:58px 22px}
 .hero{grid-template-columns:1fr}
-.hero h1{font-size:clamp(26px,7vw,52px)}
+.hero h1{font-size:clamp(13px,3.5vw,26px)}
 .hero h1 span{display:block}
 .hero-date{margin-top:26px}
 .overview-grid{grid-template-columns:1fr;margin-top:64px}
