@@ -26,7 +26,7 @@ h1,h2,h3,p{margin-top:0}
 .letter{position:absolute;z-index:2;left:6%;right:6%;bottom:4%;height:88%;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;background:linear-gradient(180deg,#fff 0%,#fffdfa 100%);border-top:6px solid var(--red);transform:translateY(76%) scale(.965);opacity:0;box-shadow:0 8px 28px rgba(46,28,22,.08);will-change:transform,opacity,filter}
 .letter::before{content:"";position:absolute;inset:0;border:1px solid rgba(218,41,28,.05);pointer-events:none}
 .letter::after{content:"";position:absolute;inset:-35% -65%;background:linear-gradient(112deg,transparent 37%,rgba(255,255,255,0) 43%,rgba(255,255,255,.94) 49%,rgba(255,255,255,.2) 54%,transparent 61%);transform:translateX(-70%) rotate(2deg);opacity:0;pointer-events:none}
-.letter-mark{font:700 clamp(30px,5vw,52px)/1 "DM Sans",sans-serif;letter-spacing:-.055em}
+.letter-mark{font:700 clamp(23px,4.5vw,46px)/1 "DM Sans",sans-serif;letter-spacing:-.055em;white-space:nowrap}
 .letter-copy{margin-top:22px;text-align:center;color:var(--muted);font-size:clamp(14px,2vw,18px);line-height:1.7;word-break:keep-all}
 .letter-mark,.letter-copy{opacity:0;transform:translateY(8px);transition:opacity .42s ease,transform .52s cubic-bezier(.22,.8,.2,1)}
 .seal{position:absolute;z-index:5;left:50%;top:42%;width:78px;height:78px;transform:translate(-50%,-50%) rotate(-7deg);filter:drop-shadow(0 8px 7px rgba(103,19,12,.32));transition:opacity .28s ease,transform .32s cubic-bezier(.22,.8,.2,1),filter .32s ease;will-change:transform,opacity}
@@ -68,9 +68,11 @@ h1,h2,h3,p{margin-top:0}
 @keyframes page-in{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
 .hero{display:grid;grid-template-columns:1.5fr .7fr;gap:7vw;align-items:end;max-width:1440px;margin:auto}
 .kicker{color:var(--red);margin-bottom:26px}
-.event-title{margin:-6px 0 34px;font:700 clamp(46px,7.2vw,110px)/.9 "DM Sans",sans-serif;letter-spacing:-.075em;color:var(--ink)}
-.event-title span{color:var(--red)}
-.hero h1{margin-bottom:32px;font-size:clamp(44px,6.8vw,104px);line-height:1.04;letter-spacing:-.065em;word-break:keep-all;text-wrap:balance}
+.event-title{margin:-6px 0 34px;font:700 clamp(28px,4.75vw,70px)/.98 "DM Sans",sans-serif;letter-spacing:-.065em;color:var(--ink)}
+.event-title-year{display:block;margin-bottom:10px;color:var(--red);font-size:.55em;letter-spacing:-.03em}
+.event-title-name{display:block;white-space:nowrap}
+.event-title-dot{color:var(--red)}
+.hero h1{margin-bottom:32px;font-size:clamp(36px,4.5vw,66px);line-height:1.15;letter-spacing:-.055em;word-break:keep-all;text-wrap:balance}
 .hero h1 span{display:block}
 .hero-description{max-width:590px;color:var(--muted);font-size:clamp(16px,1.5vw,20px);line-height:1.8;word-break:keep-all;text-wrap:pretty}
 .primary-button{margin-top:22px;padding:16px 22px;border:0;border-radius:2px;background:var(--ink);color:#fff;font-weight:700}
@@ -132,8 +134,8 @@ footer{display:flex;justify-content:space-between;padding:28px clamp(24px,5vw,76
 .nav-link{text-align:left}
 .page{min-height:calc(100vh - 68px);padding:58px 22px}
 .hero{grid-template-columns:1fr}
-.hero h1{font-size:clamp(42px,13vw,68px)}
-.hero h1 span{display:inline}
+.hero h1{font-size:clamp(26px,7vw,52px)}
+.hero h1 span{display:block}
 .hero-date{margin-top:26px}
 .overview-grid{grid-template-columns:1fr;margin-top:64px}
 .overview-grid article{min-height:auto;border-right:0;border-bottom:1px solid var(--line)}
