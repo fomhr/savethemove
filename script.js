@@ -66,6 +66,8 @@ const areaLabels = {
   '쉼터': '학대피해아동쉼터',
   '부문': '부문원'
 };
+const groupCode = (group) => ({1:'A', 2:'B', 3:'C', 4:'D'})[Number(group)] || String(group);
+const groupName = (group) => groupCode(group) + '조';
 const normalizePersonName = (value) => String(value || '').normalize('NFKC').replace(/\s+/g, '').toLocaleLowerCase('ko');
 const createTeamElement = (tag, className, content) => {
   const element = document.createElement(tag);
@@ -105,11 +107,11 @@ const renderTeamDirectory = (group) => {
   teamDirectory.replaceChildren();
 
   const masthead = createTeamElement('div', 'team-roster-masthead');
-  const mastheadNumber = createTeamElement('span', 'team-roster-masthead-number', String(group).padStart(2, '0'));
+  const mastheadNumber = createTeamElement('span', 'team-roster-masthead-number', groupCode(group));
   mastheadNumber.setAttribute('aria-hidden', 'true');
   const mastheadText = createTeamElement('div', 'team-roster-masthead-text');
-  const eyebrow = createTeamElement('p', 'team-subheading', 'TEAM ' + String(group).padStart(2,'0'));
-  const title = createTeamElement('h3', '', group + '조 전체 명단');
+  const eyebrow = createTeamElement('p', 'team-subheading', 'TEAM ' + groupCode(group));
+  const title = createTeamElement('h3', '', groupName(group) + ' 전체 명단');
   title.id = 'selectedTeamTitle';
   const subtitle = createTeamElement('p', '', '총 ' + allInGroup.length + '명 · 분야별로 함께하는 동료를 확인하세요.');
   mastheadText.append(eyebrow, title, subtitle);
@@ -149,7 +151,7 @@ const renderTeamDirectory = (group) => {
     teamDirectory.append(zone);
   }
   const notice = document.querySelector('#teamRosterAnnouncement');
-  if(notice)notice.textContent=group+'조 총 '+allInGroup.length+'명 명단을 표시했습니다.';
+  if(notice)notice.textContent=groupName(group)+' 총 '+allInGroup.length+'명 명단을 표시했습니다.';
 };
 
 const browseTeam = (group) => {
@@ -195,12 +197,12 @@ const renderNameSearch = (rawName) => {
   visibleHits.forEach(person=>{
     const item=createTeamElement('article','team-search-hit');
     const hitInfo=createTeamElement('div','team-search-hit-info');
-    hitInfo.append(createTeamElement('span','team-search-hit-group',person.group+'조'),
+    hitInfo.append(createTeamElement('span','team-search-hit-group',groupName(person.group)),
                    createTeamElement('strong','',person.name),
                    createTeamElement('p','',person.facility+' · '+(areaLabels[person.area]||person.area)));
     const browse = createTeamElement('button','team-inline-browse','이 조 전체보기 →');
     browse.type='button';
-    browse.setAttribute('aria-label',person.name+' 님의 '+person.group+'조 전체 명단 보기');
+    browse.setAttribute('aria-label',person.name+' 님의 '+groupName(person.group)+' 전체 명단 보기');
     browse.addEventListener('click',()=>browseTeam(person.group));
     item.append(hitInfo,browse);
     hitList.append(item);
