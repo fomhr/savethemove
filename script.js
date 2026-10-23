@@ -140,11 +140,10 @@ const renderTeamDirectory = (group) => {
     const list = createTeamElement('div','team-member-grid');
     people.forEach(person => {
       const item = createTeamElement('div','team-member-card');
-      const number = createTeamElement('span','team-member-seq',String(person.order).padStart(2,'0'));
       const info = createTeamElement('div','team-member-info');
       info.append(createTeamElement('strong','',person.name),
                   createTeamElement('small','',person.facility));
-      item.append(number,info);
+      item.append(info);
       list.append(item);
     });
     zone.append(list);
