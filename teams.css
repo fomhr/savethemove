@@ -75,8 +75,7 @@
 #team .team-roster-zone-head h4 {margin:0;font-size:19px;font-weight:800;letter-spacing:-.04em;}
 #team .team-roster-zone-head span {color:var(--red);font:700 13px "DM Sans",sans-serif;}
 #team .team-member-grid {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;}
-#team .team-member-card {display:flex;min-width:0;gap:12px;align-items:start;padding:14px 13px;background:#f9f9f8;}
-#team .team-member-seq {min-width:20px;padding-top:1px;font:700 11px/1.5 "DM Sans",sans-serif;color:#b02b24;}
+#team .team-member-card {display:block;min-width:0;padding:14px 13px;background:#f9f9f8;}
 #team .team-member-info {min-width:0;}
 #team .team-member-info strong {display:block;font-size:15px;font-weight:700;line-height:1.4;word-break:keep-all;}
 #team .team-member-info small {display:block;margin-top:6px;color:#737373;font-size:11px;line-height:1.55;word-break:keep-all;overflow-wrap:break-word;}
