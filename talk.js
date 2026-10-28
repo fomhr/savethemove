@@ -257,7 +257,7 @@
       if(manual)setStatus('질문 목록을 새로고침했습니다.','ok');
     }catch(error){
       if(manual || !loaded)setStatus(
-        '기존 질문 목록 연결이 불안정합니다. 저장된 질문은 시트에 유지됩니다. ('+
+        '공개 질문 시트의 A2 연결 허용 또는 공유 설정이 필요합니다. 저장된 질문은 유지됩니다. ('+
         error.message+')','error'
       );
       render();
