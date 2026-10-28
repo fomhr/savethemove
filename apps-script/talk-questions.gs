@@ -14,16 +14,67 @@ const ALLOWED_CATEGORIES = [
   '대구광역시가정위탁지원센터 · 장혜정',
   '울산신나는아동쉼터 · 이선희'
 ];
+function readPublicQuestions() {
+  const sh = SpreadsheetApp.openById(SHEET_ID).getSheetByName(TAB);
+  if (!sh) throw new Error('Question sheet not found');
+  const values = sh.getDataRange().getValues();
+  return values.slice(1)
+    .filter(row => String(row[4]).trim() === '공개')
+    .map(row => ({
+      id: String(row[0]),
+      createdAt: row[1] instanceof Date ? row[1].toISOString() : String(row[1]),
+      category: String(row[2]),
+      question: String(row[3])
+    }));
+}
 function doGet(e) {
-  const callback=String(e.parameter.callback||'');
-  if(!/^[A-Za-z][A-Za-z0-9_]{0,100}$/.test(callback)){
-    return ContentService.createTextOutput(JSON.stringify({ok:false,error:'Invalid callback'})).setMimeType(ContentService.MimeType.JSON);
+  if (e && e.parameter && e.parameter.bridge === '1') {
+    // HTML Service's google.script.run avoids ContentService's temporary
+    // redirect URLs when reading the public question list from GitHub Pages.
+    const page = String.raw`<!doctype html>
+<html lang="ko"><head><meta charset="UTF-8"><title>SAVE THE MOVE 질문 조회</title></head>
+<body><script>
+(function () {
+  var PARENT_ORIGIN = 'https://fomhr.github.io';
+  function send(type, data) {
+    window.parent.postMessage(
+      {source:'savethemove-talk-bridge', type:type, data:data},
+      PARENT_ORIGIN
+    );
   }
-  const sh=SpreadsheetApp.openById(SHEET_ID).getSheetByName(TAB);
-  const data=sh.getDataRange().getValues();
-  const questions=data.slice(1).filter(r=>String(r[4]).trim()==='공개').map(r=>({id:String(r[0]),createdAt:r[1] instanceof Date?r[1].toISOString():String(r[1]),category:String(r[2]),question:String(r[3])}));
-  const output=JSON.stringify({ok:true,questions}).replace(/</g,'\\u003c').replace(/\u2028/g,'\\u2028').replace(/\u2029/g,'\\u2029');
-  return ContentService.createTextOutput(callback+'('+output+');').setMimeType(ContentService.MimeType.JAVASCRIPT);
+  function refresh() {
+    google.script.run
+      .withSuccessHandler(function (questions) {
+        send('questions', {ok:true, questions:questions});
+      })
+      .withFailureHandler(function (err) {
+        send('error', {message:String(err && err.message || '조회 실패')});
+      })
+      .readPublicQuestions();
+  }
+  window.addEventListener('message', function (event) {
+    if (event.origin !== PARENT_ORIGIN) return;
+    if (event.data && event.data.type === 'stm-talk-refresh') refresh();
+  });
+  refresh();
+})();
+</script></body></html>`;
+    return HtmlService.createHtmlOutput(page)
+      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+  }
+  // Keep the original read-only JSONP response for compatibility.
+  const callback = String(e && e.parameter && e.parameter.callback || '');
+  if (!/^[A-Za-z][A-Za-z0-9_]{0,100}$/.test(callback)) {
+    return ContentService.createTextOutput(
+      JSON.stringify({ok:false,error:'Invalid callback'})
+    ).setMimeType(ContentService.MimeType.JSON);
+  }
+  const json = JSON.stringify({ok:true,questions:readPublicQuestions()})
+    .replace(/</g, '\\u003c')
+    .replace(/\u2028/g, '\\u2028')
+    .replace(/\u2029/g, '\\u2029');
+  return ContentService.createTextOutput(callback+'('+json+');')
+    .setMimeType(ContentService.MimeType.JAVASCRIPT);
 }
 function doPost(e) {
   try {
