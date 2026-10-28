@@ -18,17 +18,39 @@
   if(!configured){button.disabled=true;status('사전 질문 접수 시스템 연동 준비 중입니다. 접수가 시작되면 이 화면에서 바로 질문을 남길 수 있습니다.');}
   content.addEventListener('input',()=>counter.textContent=content.value.length+' / 600자');
   let callbackSequence=0;
-  const getQuestions=()=>new Promise((resolve,reject)=>{
-    if(!configured){reject(Error('연동 전'));return;}
+  // Apps Script ContentService can temporarily return a redirect/404 immediately after
+  // publishing a response. Retry the READ request; never retry a POST submission.
+  const delay=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+  const requestQuestions=()=>new Promise((resolve,reject)=>{
+    if(!configured){reject(new Error('연동 전'));return;}
     const callback='saveTheMoveTalkCB'+(++callbackSequence)+'_'+Math.random().toString(36).slice(2);
     const script=document.createElement('script');
-    const timer=setTimeout(()=>finish(Error('요청 시간이 초과되었습니다.')),12000);
-    const finish=(error,data)=>{clearTimeout(timer);delete window[callback];script.remove();error?reject(error):resolve(data);};
+    let completed=false;
+    let timer;
+    const finish=(error,data)=>{
+      if(completed)return;
+      completed=true;
+      clearTimeout(timer);
+      delete window[callback];
+      script.remove();
+      error?reject(error):resolve(data);
+    };
     window[callback]=data=>finish(null,data);
-    script.onerror=()=>finish(Error('질문 목록을 불러오지 못했습니다.'));
+    script.onerror=()=>finish(new Error('Google Apps Script 연결 또는 배포 권한 확인 필요'));
+    script.onload=()=>{if(!completed)finish(new Error('웹 앱의 질문 조회 응답 형식 확인 필요'));};
+    timer=setTimeout(()=>finish(new Error('질문 조회 응답 시간 초과')),10000);
     script.src=endpoint+(endpoint.includes('?')?'&':'?')+'callback='+encodeURIComponent(callback)+'&t='+Date.now();
     document.head.appendChild(script);
   });
+  const getQuestions=async()=>{
+    let error;
+    for(let i=0;i<3;i++){
+      if(i>0)await delay(i*1750);
+      try{return await requestQuestions();}
+      catch(e){error=e;}
+    }
+    throw error||new Error('질문 조회 실패');
+  };
   const formatDate = value => {
     const d=new Date(value); return Number.isNaN(d.valueOf())?'':new Intl.DateTimeFormat('ko-KR',{timeZone:'Asia/Seoul',month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false}).format(d);
   };
@@ -52,7 +74,15 @@
     if(loading || !configured)return;
     loading=true;
     try{const response=await getQuestions();if(!response.ok)throw Error(response.error||'목록 오류');render(response.questions);}
-    catch(error){if(showError)status('질문 목록을 새로고침하지 못했습니다. 다시 시도해 주세요.','error');if(!list.children.length){const p=document.createElement('p');p.className='talk-empty';p.textContent='현재 질문 목록을 불러올 수 없습니다.';list.appendChild(p);}}
+    catch(error){
+      if(showError)status('질문 목록 조회에 문제가 있습니다. 잠시 후 다시 시도해 주세요. ('+error.message+')','error');
+      if(list.querySelector('.talk-empty')){
+        list.replaceChildren();
+        const p=document.createElement('p');p.className='talk-empty';
+        p.textContent='질문을 불러오지 못했습니다. 아래 새로고침을 눌러 다시 시도해 주세요.';
+        list.appendChild(p);
+      }
+    }
     finally{loading=false;}
   }
   reload.addEventListener('click',()=>load(true));
@@ -73,7 +103,9 @@
       }
       if(!saved)throw Error('저장 확인 지연');
       content.value='';counter.textContent='0 / 600자';status('질문이 정상적으로 접수되었습니다.','ok');
-    } catch(error){status('접수 여부를 확인하지 못했습니다. 목록을 새로고침해 확인한 뒤, 중복 접수되지 않도록 주의해 주세요.','error');}
+    } catch(error){
+      status('접수 여부 확인이 지연되고 있습니다. 중복 접수는 하지 마시고, 잠시 후 질문 목록을 새로고침해 주세요. ('+error.message+')','error');
+    }
     finally{button.disabled=false;button.textContent='질문 접수하기 →';}
   }
   form.addEventListener('submit',e=>{e.preventDefault();submit();});
