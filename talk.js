@@ -233,13 +233,9 @@
   }
 
   async function fetchPublicQuestions(){
-    let firstError;
-    try{return await requestPublicSheet();}
-    catch(error){firstError=error;}
-    try{return await requestByForm('list');}
-    catch(error){}
-    try{return await requestJsonp();}
-    catch(error){throw new Error('공개 시트 연결 필요: '+firstError.message);}
+    // The public-only sheet is the single read source. Do not use the
+    // unreliable Apps Script GET/iframe paths as a hidden dependency.
+    return await requestPublicSheet();
   }
 
   function acceptServerQuestions(answer){
