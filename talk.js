@@ -47,6 +47,7 @@
   let loading=false;
   let lastAttempt=null;
   let jsonpCounter=0;
+  const PUBLIC_SHEET_ID='1Dsr32cgk3KDxnf-wd-XFDzcDshtM3wC7wqrftGvo8eg';
 
   const newNonce=()=>Array.from({length:3},()=>Math.random().toString(36).slice(2,10)).join('-');
   const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
@@ -94,7 +95,7 @@
       category.className='talk-item-category';
       category.textContent=String(q.category||'전체 토크콘서트');
       const date=document.createElement('time');
-      date.textContent=dateLabel(q.createdAt);
+      date.textContent=q.displayDate||dateLabel(q.createdAt);
       meta.append(category,date);
       if(q.localState){
         const state=document.createElement('span');
@@ -108,6 +109,44 @@
       item.append(avatar,main);
       list.appendChild(item);
     });
+  }
+
+  // Primary read source: public-only Google Sheet. The private intake sheet
+  // stays inaccessible to anonymous visitors. IMPORTRANGE filters 공개 rows.
+  async function requestPublicSheet(){
+    const url='https://docs.google.com/spreadsheets/d/'+PUBLIC_SHEET_ID+
+      '/gviz/tq?tqx=out:json&sheet='+encodeURIComponent('공개 질문')+
+      '&range=A%3AD&_='+Date.now();
+    const response=await fetch(url,{method:'GET',cache:'no-store',credentials:'omit'});
+    if(!response.ok)throw new Error('공개 질문 시트 HTTP '+response.status);
+    const text=await response.text();
+    const start=text.indexOf('{'),end=text.lastIndexOf('}');
+    if(start<0||end<=start)throw new Error('공개 시트 응답 형식 오류');
+    const data=JSON.parse(text.slice(start,end+1));
+    if(data.status==='error')throw new Error('공개 질문 시트의 연결 또는 공유 권한 확인 필요');
+    if(!data.table||!Array.isArray(data.table.rows))throw new Error('질문 데이터 형식 오류');
+    const toValue=cell=>cell&&cell.v!==null&&cell.v!==undefined?String(cell.v):'';
+    const toDate=cell=>{
+      if(!cell)return '';
+      const v=toValue(cell);
+      const m=/^Date\((\d+),(\d+),(\d+)(?:,(\d+),(\d+),(\d+))?\)$/.exec(v);
+      if(m){
+        return new Date(Date.UTC(+m[1],+m[2],+m[3],+(m[4]||0)-9,+(m[5]||0),+(m[6]||0))).toISOString();
+      }
+      const parsed=new Date(v);
+      return Number.isNaN(parsed.valueOf())?v:parsed.toISOString();
+    };
+    const questions=data.table.rows.map(row=>{
+      const cells=row.c||[];
+      return {
+        id:toValue(cells[0]),
+        createdAt:toDate(cells[1]),
+        displayDate:cells[1]&&cells[1].f?String(cells[1].f):'',
+        category:toValue(cells[2]),
+        question:toValue(cells[3])
+      };
+    }).filter(q=>q.id.startsWith('STM-')&&q.question);
+    return {ok:true,questions};
   }
 
   // Main transport: an HTML form POST to Apps Script, with an HTML Service
@@ -195,10 +234,12 @@
 
   async function fetchPublicQuestions(){
     let firstError;
-    try{return await requestByForm('list');}
+    try{return await requestPublicSheet();}
     catch(error){firstError=error;}
+    try{return await requestByForm('list');}
+    catch(error){}
     try{return await requestJsonp();}
-    catch(error){throw new Error('질문 목록 조회 실패: '+firstError.message);}
+    catch(error){throw new Error('공개 시트 연결 필요: '+firstError.message);}
   }
 
   function acceptServerQuestions(answer){
@@ -250,19 +291,27 @@
     submitButton.textContent='저장 중…';
     setStatus('댓글에 먼저 표시했습니다. 구글시트 저장을 확인하고 있습니다.');
     try{
-      let answer;
-      try{
-        answer=await requestByForm('submit',{id,category,question});
-        if(!answer.receipt || answer.receipt.id!==id)
-          throw new Error('저장 확인 값이 일치하지 않습니다.');
-        acceptServerQuestions(answer);
-      }catch(postError){
-        // Older deployments may have completed their POST but not replied.
-        // Never submit the same POST again automatically.
-        const latest=await fetchPublicQuestions();
-        acceptServerQuestions(latest);
-        if(!publicQuestions.some(q=>String(q.id)===id))throw postError;
+      // Keep the original proven JSON POST writer. This request is fire-and-
+      // forget by browser design, but the read-only public sheet confirms it.
+      await fetch(endpoint,{
+        method:'POST',
+        mode:'no-cors',
+        headers:{'Content-Type':'text/plain;charset=utf-8'},
+        body:JSON.stringify({id,category,question})
+      });
+      let confirmed=false;
+      for(let i=0;i<8;i++){
+        await wait(900+i*450);
+        try{
+          const answer=await fetchPublicQuestions();
+          acceptServerQuestions(answer);
+          if(publicQuestions.some(q=>String(q.id)===id)){
+            confirmed=true;
+            break;
+          }
+        }catch(error){}
       }
+      if(!confirmed)throw new Error('저장 확인 지연: 공개 질문 시트의 권한 또는 원본 연결을 확인해 주세요.');
       lastAttempt=null;
       pending.delete(id);
       field.value='';
