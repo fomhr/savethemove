@@ -75,6 +75,7 @@
     loading=true;
     try{const response=await getQuestions();if(!response.ok)throw Error(response.error||'목록 오류');render(response.questions);}
     catch(error){
+      count.textContent='목록 불러오기 실패';
       if(showError)status('질문 목록 조회에 문제가 있습니다. 잠시 후 다시 시도해 주세요. ('+error.message+')','error');
       if(list.querySelector('.talk-empty')){
         list.replaceChildren();
@@ -86,12 +87,18 @@
     finally{loading=false;}
   }
   reload.addEventListener('click',()=>load(true));
+  // Reuse the same id for an identical retry, so Sheets does not receive duplicate questions.
+  let lastAttempt=null;
   async function submit(){
     const category=select.value, question=content.value.trim();
     if(!question || question.length<10){status('질문을 10자 이상 입력해 주세요.','error');content.focus();return;}
     if(question.length>600){status('질문은 600자 이내로 작성해 주세요.','error');return;}
     if(!configured)return;
-    const id='STM-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,10);
+    const signature=category+'\n'+question;
+    const id=lastAttempt&&lastAttempt.signature===signature
+      ?lastAttempt.id
+      :'STM-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,10);
+    lastAttempt={signature,id};
     button.disabled=true;button.textContent='접수 확인 중…';status('질문을 접수하고 있습니다.');
     try {
       await fetch(endpoint,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({id,category,question})});
@@ -102,6 +109,7 @@
         if(response.ok){render(response.questions);if((response.questions||[]).some(q=>q.id===id)){saved=true;break;}}
       }
       if(!saved)throw Error('저장 확인 지연');
+      lastAttempt=null;
       content.value='';counter.textContent='0 / 600자';status('질문이 정상적으로 접수되었습니다.','ok');
     } catch(error){
       status('접수 여부 확인이 지연되고 있습니다. 중복 접수는 하지 마시고, 잠시 후 질문 목록을 새로고침해 주세요. ('+error.message+')','error');
