@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="styles.css?v=20261019-4" />
   <link rel="stylesheet" href="schedule.css?v=20261019-3" />
   <link rel="stylesheet" href="teams.css?v=20261023-1" />
-  <link rel="stylesheet" href="talk.css?v=20261028-2" />
+  <link rel="stylesheet" href="talk.css?v=20261028-3" />
 </head>
 <body>
   <a class="skip-link" href="#main">본문으로 바로가기</a>
@@ -97,7 +97,10 @@
       </section>
       <section class="page" id="talk" aria-labelledby="talk-title">
         <div class="talk-shell">
-          <header class="talk-heading"><p class="kicker">TALK CONCERT · PRE-QUESTIONS</p><h2 id="talk-title">토크콘서트<br>사전 질문 접수</h2><p class="talk-intro">사전에 배포된 실천사례집을 읽고 궁금했던 내용을 자유롭게 남겨 주세요.<br>여러분의 질문을 통해 현장의 고민과 실천 경험을 더욱 깊이 나누고자 합니다. 접수된 질문은 검토 후 토크콘서트 진행에 반영될 수 있습니다.</p><div class="talk-meta"><span>2026. 11. 12. (목)</span><span>11:10 – 12:00 · 50분</span><span>우수사례 토크콘서트</span></div></header>
+          <header class="talk-heading"><p class="kicker">TALK CONCERT · PRE-QUESTIONS</p><h2 id="talk-title">토크콘서트<br>사전 질문 접수</h2><div class="talk-booklet-wrap">
+            <a id="talkBookletLink" class="talk-booklet-link" hidden download="2026_SAVE_THE_MOVE_실천사례집.pdf" aria-label="2026 SAVE THE MOVE 실천사례집 PDF 다운로드"><span class="talk-booklet-mark" aria-hidden="true">PDF</span><span class="talk-booklet-label">실천사례집 다운받기 <span class="talk-booklet-detail">(클릭 시 다운로드)</span></span><span class="talk-booklet-arrow" aria-hidden="true">↓</span></a>
+            <div id="talkBookletPending" class="talk-booklet-link is-pending" role="status"><span class="talk-booklet-mark" aria-hidden="true">PDF</span><span class="talk-booklet-label">실천사례집 다운받기 <span class="talk-booklet-detail">(PDF 연결 준비 중)</span></span><span class="talk-booklet-arrow" aria-hidden="true">↓</span></div>
+          </div><p class="talk-intro">사전에 배포된 실천사례집을 읽고 궁금했던 내용을 자유롭게 남겨 주세요.<br>여러분의 질문을 통해 현장의 고민과 실천 경험을 더욱 깊이 나누고자 합니다. 접수된 질문은 검토 후 토크콘서트 진행에 반영될 수 있습니다.</p><div class="talk-meta"><span>2026. 11. 12. (목)</span><span>11:10 – 12:00 · 50분</span><span>우수사례 토크콘서트</span></div></header>
           <div class="talk-people"><section class="talk-people-panel"><p class="talk-subheading">HOSTS</p><h3>진행자</h3><div class="talk-hosts"><span><strong>박유선</strong> 부문장</span><span><strong>오정아</strong> 매니저</span></div></section><section class="talk-people-panel"><p class="talk-subheading">PANELISTS · 5</p><h3>함께 이야기 나눌 패널</h3><div class="talk-panelists"><div class="talk-panelist"><b>김은지 상담원</b><small>대전서부아동보호전문기관</small></div><div class="talk-panelist"><b>박혜원 상담원</b><small>인천광역시아동보호전문기관</small></div><div class="talk-panelist"><b>최시원 치료사</b><small>전북가정위탁지원센터</small></div><div class="talk-panelist"><b>장혜정 상담원</b><small>대구광역시가정위탁지원센터</small></div><div class="talk-panelist"><b>이선희 보육사</b><small>울산신나는아동쉼터</small></div></div></section></div>
           <section class="talk-form-shell" aria-labelledby="talk-form-heading"><div class="talk-section-line"><div><h3 id="talk-form-heading">궁금한 점을 남겨 주세요.</h3><p>모든 사례에 대한 공통 질문도 접수할 수 있습니다.</p></div></div><form id="talkQuestionForm"><label class="talk-label" for="talkCategory">질문 대상</label><select class="talk-select" id="talkCategory" name="category" aria-label="질문 대상 사례 선택"></select><label class="talk-label" for="talkQuestion">질문 내용</label><textarea class="talk-textarea" id="talkQuestion" name="question" placeholder="사례집을 읽고 궁금했던 점이나 현장의 실천과 연결해 함께 나누고 싶은 질문을 작성해 주세요." maxlength="600" minlength="10" required></textarea><div class="talk-form-foot"><span class="talk-counter" id="talkCounter">0 / 600자</span><button type="submit" class="talk-submit" id="talkSubmit">질문 접수하기 →</button></div><p class="talk-feedback" id="talkFeedback" role="status" aria-live="polite"></p></form><p class="talk-privacy">※ 접수한 질문은 이 페이지 하단에 공개됩니다. 아동·보호자 실명, 연락처, 주소 등 개인을 알아볼 수 있는 정보와 민감한 사례정보는 기재하지 말아 주세요.<br>※ 행사 시간과 운영 상황에 따라 모든 질문을 다루기는 어려울 수 있습니다.</p></section>
           <section class="talk-list" aria-labelledby="talk-list-heading"><header class="talk-list-heading"><h3 id="talk-list-heading">접수된 질문</h3><span id="talkCount">0개의 질문</span></header><div id="talkItems" class="talk-items" aria-live="polite"><p class="talk-empty">질문 목록을 준비하고 있습니다.</p></div><div class="talk-list-actions"><button type="button" class="talk-reload" id="talkReload">질문 목록 새로고침 ↻</button></div></section>
@@ -107,6 +110,7 @@
   </div><script src="team-data.js?v=20261028-1"></script>
   <script src="script.js?v=20261023-3"></script>
   <script src="talk-config.js?v=20261028-1"></script>
+  <script src="talk-booklet.js?v=20261028-1"></script>
   <script src="talk.js?v=20261028-7"></script>
 </body>
 </html>
