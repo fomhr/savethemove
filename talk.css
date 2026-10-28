@@ -17,3 +17,8 @@
 @media(max-width:800px){.talk-people{grid-template-columns:1fr}.talk-panelists{grid-template-columns:1fr 1fr}.talk-shell{width:100%}.talk-form-foot{align-items:stretch}.talk-submit{padding:14px 19px}}
 @media(max-width:540px){.talk-panelists{grid-template-columns:1fr}.talk-form-foot{flex-direction:column;align-items:flex-end}.talk-submit{width:100%}.talk-list-heading{align-items:start}.talk-item{grid-template-columns:30px 1fr;gap:12px}.talk-avatar{width:30px;height:30px;font-size:14px}.talk-heading h2{font-size:34px}}
 @media(prefers-reduced-motion:reduce){.talk-shell *{scroll-behavior:auto}}
+
+/* Pending comments remain visible but are never marked as received until saved. */
+.talk-item-state{display:inline-flex;align-items:center;margin-left:2px;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:-.02em;white-space:nowrap}
+.talk-item-state.is-saving{background:#fff1e5;color:#9b530d}
+.talk-item-state.is-unconfirmed{background:#fff2f1;color:#a3221b}
