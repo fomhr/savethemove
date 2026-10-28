@@ -29,16 +29,20 @@ function readPublicQuestions() {
 }
 function doGet(e) {
   if (e && e.parameter && e.parameter.bridge === '1') {
-    // HTML Service's google.script.run avoids ContentService's temporary
-    // redirect URLs when reading the public question list from GitHub Pages.
-    const page = String.raw`<!doctype html>
+    // The nonce binds a publicly readable reply to one on-page request.
+    const nonce = String(e.parameter.nonce || '');
+    if (!/^[a-z0-9-]{10,70}$/.test(nonce)) {
+      return ContentService.createTextOutput('Invalid request');
+    }
+    const pageTemplate = String.raw`<!doctype html>
 <html lang="ko"><head><meta charset="UTF-8"><title>SAVE THE MOVE 질문 조회</title></head>
 <body><script>
 (function () {
   var PARENT_ORIGIN = 'https://fomhr.github.io';
+  var NONCE = __NONCE__;
   function send(type, data) {
-    window.parent.postMessage(
-      {source:'savethemove-talk-bridge', type:type, data:data},
+    window.top.postMessage(
+      {source:'savethemove-talk-bridge', nonce:NONCE, type:type, data:data},
       PARENT_ORIGIN
     );
   }
@@ -52,13 +56,10 @@ function doGet(e) {
       })
       .readPublicQuestions();
   }
-  window.addEventListener('message', function (event) {
-    if (event.origin !== PARENT_ORIGIN) return;
-    if (event.data && event.data.type === 'stm-talk-refresh') refresh();
-  });
   refresh();
 })();
 </script></body></html>`;
+    const page = pageTemplate.replace('__NONCE__', JSON.stringify(nonce));
     return HtmlService.createHtmlOutput(page)
       .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
   }
