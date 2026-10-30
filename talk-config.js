@@ -3,4 +3,4 @@ window.SAVE_THE_MOVE_TALK_ENDPOINT = 'https://script.google.com/macros/s/AKfycbw
 
 // Verified final PDF address (Drive sharing URL or a same-site .pdf path).
 // Leave blank while the final casebook PDF is not ready.
-window.SAVE_THE_MOVE_CASEBOOK_PDF_URL = 'assets/2026 SAVE THE MOVE_CASE BOOK.pdf';
+window.SAVE_THE_MOVE_CASEBOOK_PDF_URL = 'assets/2026_SAVE_THE_MOVE_CASEBOOK.pdf';
