@@ -36,3 +36,11 @@ a.talk-booklet-link:focus-visible{outline:3px solid #951b15;outline-offset:4px}
 .talk-booklet-link.is-pending{background:#f5f5f4;border-color:#e3e3e3;color:#777;box-shadow:none;cursor:default}
 .talk-booklet-link.is-pending .talk-booklet-mark{border-color:#bbb}
 @media(max-width:540px){.talk-booklet-link{display:flex;width:100%;gap:10px;padding:13px}.talk-booklet-label{font-size:14px}.talk-booklet-detail{font-size:11px}.talk-booklet-arrow{margin-left:auto;font-size:20px}}
+
+/* Intake closed 2026-11-04 18:00 KST: notice and read-only form. */
+.talk-closed-notice{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 24px;padding:19px 22px;margin-bottom:25px;background:#fff6f4;border:1px solid #eed3cf;border-left:5px solid #da291c;word-break:keep-all}
+.talk-closed-notice strong{font-size:19px;color:#aa291f;letter-spacing:-.03em}
+.talk-closed-notice span{font-size:13px;font-weight:600;color:#765d59}
+.talk-select:disabled,.talk-textarea:disabled{background:#f4f4f4;color:#858585;border-color:#e2e2e2;cursor:not-allowed;opacity:1}
+.talk-textarea:disabled::placeholder{color:#999}
+@media(max-width:540px){.talk-closed-notice{padding:17px}.talk-closed-notice strong{font-size:17px}}
