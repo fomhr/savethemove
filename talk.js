@@ -3,6 +3,8 @@
   'use strict';
 
   const endpoint=(window.SAVE_THE_MOVE_TALK_ENDPOINT||'').trim();
+  // Intake closed at 2026-11-04 18:00 KST. Keep public question viewing enabled.
+  const INTAKE_CLOSED=true;
   const configured=/^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec(?:\?.*)?$/.test(endpoint);
   const categories=[
     '전체 토크콘서트',
@@ -35,7 +37,12 @@
     feedback.textContent=message;
     feedback.dataset.kind=kind;
   };
-  if(!configured){
+  if(INTAKE_CLOSED){
+    select.disabled=true;
+    field.disabled=true;
+    submitButton.disabled=true;
+    submitButton.textContent='접수 마감';
+  }else if(!configured){
     submitButton.disabled=true;
     setStatus('질문 접수 연결 설정을 확인해 주세요.','error');
   }
@@ -77,7 +84,7 @@
       const blank=document.createElement('p');
       blank.className='talk-empty';
       blank.textContent=loaded
-        ?'아직 접수된 질문이 없습니다. 첫 번째 질문을 남겨 주세요.'
+        ?'현재 공개된 질문이 없습니다.'
         :'기존 질문 목록을 불러오지 못했습니다. 아래 새로고침 버튼으로 다시 시도해 주세요.';
       list.appendChild(blank);
       return;
@@ -267,6 +274,7 @@
   reload.addEventListener('click',()=>refresh(true));
 
   async function submit(){
+    if(INTAKE_CLOSED){setStatus('사전 질문 접수가 마감되었습니다.');return;}
     if(submitButton.disabled)return;
     const category=select.value;
     const question=field.value.trim();
@@ -323,12 +331,16 @@
         error.message+')','error'
       );
     }finally{
-      submitButton.disabled=false;
-      submitButton.textContent='질문 접수하기 →';
+      submitButton.disabled=INTAKE_CLOSED;
+      submitButton.textContent=INTAKE_CLOSED?'접수 마감':'질문 접수하기 →';
     }
   }
 
-  form.addEventListener('submit',event=>{event.preventDefault();submit();});
+  form.addEventListener('submit',event=>{
+    event.preventDefault();
+    if(INTAKE_CLOSED){setStatus('사전 질문 접수가 마감되었습니다.');return;}
+    submit();
+  });
   render();
   refresh();
   window.setInterval(()=>{
