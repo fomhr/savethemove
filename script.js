@@ -57,8 +57,10 @@ const teamRoster = (window.SAVE_THE_MOVE_ROSTER || []).map((entry) => ({
   order: Number(entry[1]),
   name: String(entry[2]),
   area: String(entry[3]),
-  facility: String(entry[4])
+  facility: String(entry[4]),
+  participation: String(entry[5] || '')
 }));
+const assignedRoster = teamRoster.filter(person => person.group >= 1 && person.group <= 4);
 const areaOrder = ['아보전', '가정위탁', '쉼터', '부문'];
 const areaLabels = {
   '아보전': '아동보호전문기관',
@@ -66,8 +68,8 @@ const areaLabels = {
   '쉼터': '학대피해아동쉼터',
   '부문': '부문원'
 };
-const groupCode = (group) => ({1:'A', 2:'B', 3:'C', 4:'D'})[Number(group)] || String(group);
-const groupName = (group) => groupCode(group) + '조';
+const groupCode = (group) => ({1:'A', 2:'B', 3:'C', 4:'D'})[Number(group)] || '미배정';
+const groupName = (group) => Number(group) === 0 ? '조별활동 미참여' : groupCode(group) + '조';
 const normalizePersonName = (value) => String(value || '').normalize('NFKC').replace(/\s+/g, '').toLocaleLowerCase('ko');
 const createTeamElement = (tag, className, content) => {
   const element = document.createElement(tag);
@@ -113,7 +115,7 @@ const renderTeamDirectory = (group) => {
   const eyebrow = createTeamElement('p', 'team-subheading', 'TEAM ' + groupCode(group));
   const title = createTeamElement('h3', '', groupName(group) + ' 전체 명단');
   title.id = 'selectedTeamTitle';
-  const subtitle = createTeamElement('p', '', '총 ' + allInGroup.length + '명 · 분야별로 함께하는 동료를 확인하세요.');
+  const subtitle = createTeamElement('p', '', '배정 ' + allInGroup.length + '명 · 13:30~15:30 ' + allInGroup.filter(person => !person.participation).length + '명 · 15:30~16:00 ' + allInGroup.length + '명');
   mastheadText.append(eyebrow, title, subtitle);
   masthead.append(mastheadNumber, mastheadText);
   teamDirectory.append(masthead);
@@ -143,6 +145,7 @@ const renderTeamDirectory = (group) => {
       const info = createTeamElement('div','team-member-info');
       info.append(createTeamElement('strong','',person.name),
                   createTeamElement('small','',person.facility));
+      if (person.participation) info.append(createTeamElement('small','team-participation-note',person.participation));
       item.append(info);
       list.append(item);
     });
@@ -199,6 +202,12 @@ const renderNameSearch = (rawName) => {
     hitInfo.append(createTeamElement('span','team-search-hit-group',groupName(person.group)),
                    createTeamElement('strong','',person.name),
                    createTeamElement('p','',person.facility+' · '+(areaLabels[person.area]||person.area)));
+    if (person.participation) hitInfo.append(createTeamElement('p','team-result-note',person.participation));
+    if (person.group === 0) {
+      item.append(hitInfo);
+      hitList.append(item);
+      return;
+    }
     const browse = createTeamElement('button','team-inline-browse','이 조 전체보기 →');
     browse.type='button';
     browse.setAttribute('aria-label',person.name+' 님의 '+groupName(person.group)+' 전체 명단 보기');
@@ -221,9 +230,9 @@ teamGroupButtons.forEach(button=>button.addEventListener('click',()=>renderTeamD
 const browseAllButton=document.querySelector('#browseFromSearch');
 if (browseAllButton) browseAllButton.addEventListener('click',()=>browseTeam(1));
 const teamTotal=document.querySelector('#teamTotalCount');
-if(teamTotal)teamTotal.textContent=String(teamRoster.length);
+if(teamTotal)teamTotal.textContent=String(assignedRoster.length);
 const browseTotal=document.querySelector('#browseAllCount');
-if(browseTotal)browseTotal.textContent='총 '+teamRoster.length+'명';
+if(browseTotal)browseTotal.textContent='조별활동 배정 '+assignedRoster.length+'명';
 document.querySelectorAll('[data-count-group]').forEach(node=>{
   const group=Number(node.dataset.countGroup);
   node.textContent=teamRoster.filter(person=>person.group===group).length+'명';
