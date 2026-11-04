@@ -38,6 +38,10 @@ function readPublicQuestions() {
 }
 
 function saveQuestion_(data) {
+  // The web-app deployment must be updated separately for this server-side cutoff to take effect.
+  if (Date.now() >= Date.parse('2026-11-04T09:00:00Z')) {
+    throw new Error('사전 질문 접수가 마감되었습니다.');
+  }
   const id = String(data.id || '').trim();
   const category = String(data.category || '').trim();
   const question = String(data.question || '').trim();
