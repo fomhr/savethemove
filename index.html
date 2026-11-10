@@ -126,20 +126,23 @@
   // Menu remains accessible for the locked-state notice; the action is disabled until open.
   (() => {
     const opensAt = Date.parse('2026-11-12T16:00:00+09:00');
+    const closesAt = Date.parse('2026-11-21T00:00:00+09:00'); // Nov 20 23:59 is included
     const button = document.getElementById('survey-launch-button');
     const notice = document.getElementById('survey-lock-notice');
     if (!button || !notice) return;
     function updateSurveyAvailability() {
-      const opened = Date.now() >= opensAt;
-      button.disabled = !opened;
-      button.setAttribute('aria-label', opened ? '만족도 조사 페이지로 이동' : '만족도 조사 시작 전 잠금');
-      button.innerHTML = opened ? '만족도 조사 페이지로 이동 <span aria-hidden="true">→</span>' : '11월 12일 16:00 오픈 예정 <span aria-hidden="true">🔒</span>';
-      notice.textContent = opened ? '만족도 조사 참여가 시작되었습니다.' : '🔒 만족도 조사는 2026년 11월 12일(목) 16:00부터 참여할 수 있습니다.';
-      notice.style.color = opened ? '#176a44' : '#b51f16';
+      const now = Date.now();
+      const upcoming = now < opensAt;
+      const closed = now >= closesAt;
+      button.disabled = upcoming || closed;
+      button.setAttribute('aria-label', upcoming ? '만족도 조사 시작 전 잠금' : closed ? '만족도 조사 접수 마감' : '만족도 조사 페이지로 이동');
+      button.innerHTML = upcoming ? '11월 12일 16:00 오픈 예정 <span aria-hidden="true">🔒</span>' : closed ? '만족도 조사 마감 <span aria-hidden="true">🔒</span>' : '만족도 조사 페이지로 이동 <span aria-hidden="true">→</span>';
+      notice.textContent = upcoming ? '🔒 만족도 조사는 2026년 11월 12일(목) 16:00부터 참여할 수 있습니다.' : closed ? '2026 SAVE THE MOVE 만족도 조사는 11월 20일(금) 23:59에 마감되었습니다.' : '만족도 조사 기간: 11월 12일(목) 16:00 ~ 11월 20일(금) 23:59';
+      notice.style.color = upcoming || closed ? '#b51f16' : '#176a44';
     }
     button.addEventListener('click', () => {
-      if (Date.now() < opensAt) return;
-      window.location.href = 'survey/?v=20261110-lockfix';
+      if (Date.now() < opensAt || Date.now() >= closesAt) return;
+      window.location.href = 'survey/?v=20261110-closefix';
     });
     updateSurveyAvailability();
     setInterval(updateSurveyAvailability, 10000);
