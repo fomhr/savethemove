@@ -16,7 +16,8 @@
 // 로그인 화면으로 이동하면 Apps Script 배포의 접근 권한을 먼저 확인하세요.
 const SUBMISSION_ENDPOINT = 'https://script.google.com/a/macros/sc.or.kr/s/AKfycbwCgwUEfsqaJJLs3PM_gz3xXrhBWDjfpAT0Hgfoe_3qjPKu86xWxIKK3dz0gKsbfaQI/exec'; // 배포된 Apps Script /exec URL 설정
 const SURVEY_OPENS_AT = Date.parse('2026-11-12T16:00:00+09:00');
-const surveyIsOpen = () => Date.now() >= SURVEY_OPENS_AT;
+const SURVEY_CLOSES_AT = Date.parse('2026-11-21T00:00:00+09:00'); // Nov 20 23:59:59 KST is the last accepted second
+const surveyIsOpen = () => Date.now() >= SURVEY_OPENS_AT && Date.now() < SURVEY_CLOSES_AT;
 const SCALE_5=['전혀 그렇지 않다','그렇지 않다','보통이다','그렇다','매우 그렇다'];
 const SCALE_4=['전혀 그렇지 않다','그렇지 않다','그렇다','매우 그렇다'];
 const SCALE_SATISFACTION_4=['매우 불만족','불만족','만족','매우 만족'];
@@ -55,6 +56,17 @@ function cleanIneligible(){if(!isMorning()){[3,4,5,6,7,8,13,14,15,16,17].forEach
 function escapeHtml(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function renderQuestion(n){const q=QUESTIONS[n];let field='';if(q.type==='radio'||q.type==='scale'){const arr=q.type==='scale'?scaleFor(n):q.options;field=`<div class="${q.type==='scale'?(arr.length===4?'scale four':'scale'):'options'}" role="radiogroup" aria-label="${escapeHtml(q.title)}">`+arr.map((label,i)=>{const value=q.type==='scale'?String(i+1):label;return `<label class="option"><input type="radio" name="q${n}" value="${escapeHtml(value)}" ${String(answers[n]??'')===value?'checked':''}><span>${q.type==='scale'?`${i+1}점 · `:''}${escapeHtml(label)}</span></label>`}).join('')+'</div>';}else if(q.type==='multi'){field='<div class="options">'+q.options.map(label=>`<label class="option"><input type="checkbox" name="q21" value="${escapeHtml(label)}" ${(answers[21]||[]).includes(label)?'checked':''}><span>${escapeHtml(label)}</span></label>`).join('')+'</div><div class="question-followup"><label class="question-title" for="other"><span class="num">21-2.</span>선택한 프로그램에 대한 구체적인 제안이나 새롭게 운영했으면 하는 내용이 있나요?</label><p class="hint">선택한 항목과 관계없이 자유롭게 작성할 수 있습니다. (선택 응답)</p><textarea id="other" maxlength="200" placeholder="예: 기관 간 소규모 교류 시간 확대, 토크콘서트 주제 제안 등">'+escapeHtml(answers.other||'')+'</textarea></div>';}else field=`<textarea id="q${n}" maxlength="2000" placeholder="자유롭게 작성 (선택)">${escapeHtml(answers[n]||'')}</textarea>`;return `<div class="question" data-q="${n}"><p class="question-title"><span class="num">${n}.</span>${escapeHtml(q.title)}${n===21?'<span class="required">*중복 체크 가능</span>':''}</p>${field}${q.hint?`<p class="hint">${escapeHtml(q.hint)}</p>`:''}<div class="error hidden" aria-live="polite">필수 문항에 응답해 주세요.</div></div>`;}
 function render(){
+ if (Date.now() >= SURVEY_CLOSES_AT) {
+   $('survey-controls').hidden = true;
+   $('next').disabled = true;
+   $('prev').disabled = true;
+   $('stepCounter').textContent = '접수 마감';
+   $('percent').textContent = '2026.11.20 · 23:59';
+   $('progress').style.width = '100%';
+   $('content').innerHTML = '<div class="stephead">만족도 조사 마감</div><div class="notice" role="status">2026 SAVE THE MOVE 만족도 조사는 11월 20일(금) 23:59에 마감되었습니다.</div><p class="step-desc">참여해 주신 모든 분께 감사드립니다.</p>';
+   $('status').textContent = '';
+   return;
+ }
  if (!surveyIsOpen()) {
    $('survey-controls').hidden = true;
    $('next').disabled = true;
