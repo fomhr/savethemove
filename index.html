@@ -139,7 +139,7 @@
     }
     button.addEventListener('click', () => {
       if (Date.now() < opensAt) return;
-      window.location.href = 'survey/';
+      window.location.href = 'survey/?v=20261110-lockfix';
     });
     updateSurveyAvailability();
     setInterval(updateSurveyAvailability, 10000);
