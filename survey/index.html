@@ -39,7 +39,6 @@ const QUESTIONS={
   20:{title:'향후 SAVE THE MOVE 실천사례 공유회에서 확대하거나 새롭게 운영했으면 하는 프로그램은 무엇인가요?',type:'multi',required:false,options:['실천사례 발표','토크콘서트 및 질의응답','시상 및 동료 격려','기관 간 교류','참여형 프로그램','기타']}
 };
 // [변경 1] 공모전 참여 유형 구분 안내
-QUESTIONS[3].hint = '공모전 참여자는 실천사례를 제출한 사람을 의미합니다. 실천사례 공모전 수상자에는 베스트 동료 수상자가 포함되지 않습니다. 베스트 동료 수상자는 사례 제출 여부에 따라 참여자 또는 일반 참석자를 선택해 주세요.';
 let answers={},stepIndex=0,submitted=false;
 const RESPONSE_ID = 'stm_'+Array.from(crypto.getRandomValues(new Uint8Array(16)), x=>x.toString(16).padStart(2,'0')).join('');
 const $=id=>document.getElementById(id);
