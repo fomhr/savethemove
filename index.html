@@ -110,8 +110,8 @@
           <h2 id="survey-info-title">만족도 조사</h2>
           <p>2026 SAVE THE MOVE 실천사례 공유회에 함께해 주셔서 감사합니다.<br>행사 운영과 현장의 실천에 대한 여러분의 의견을 들려주세요.</p>
         </div>
-        <p id="survey-lock-notice" role="status" style="color:#b51f16;font-weight:700;margin:0 0 16px">🔒 만족도 조사는 2026년 11월 12일(목) 16:00부터 참여할 수 있습니다.</p>
-        <button id="survey-launch-button" class="primary-button" type="button" disabled aria-label="만족도 조사 시작 전 잠금">11월 12일 16:00 오픈 예정 <span aria-hidden="true">🔒</span></button>
+        <p id="survey-lock-notice" role="status" style="color:#b51f16;font-weight:700;margin:0 0 16px">🔒 만족도 조사는 2026년 11월 12일(목) 15:30부터 참여할 수 있습니다.</p>
+        <button id="survey-launch-button" class="primary-button" type="button" disabled aria-label="만족도 조사 시작 전 잠금">11월 12일 15:30 오픈 예정 <span aria-hidden="true">🔒</span></button>
       </section>
     </main><footer class="footer"><span>2026 SAVE THE MOVE</span><p>Save the Children Korea · 아동보호사업부문</p></footer>
   </div><script src="team-data.js?v=20261111-1"></script>
@@ -123,7 +123,7 @@
   // Korea Standard Time 2026-11-12 16:00 = 2026-11-12 07:00 UTC.
   // Menu remains accessible for the locked-state notice; the action is disabled until open.
   (() => {
-    const opensAt = Date.parse('2026-11-12T16:00:00+09:00');
+    const opensAt = Date.parse('2026-11-12T15:30:00+09:00');
     const closesAt = Date.parse('2026-11-21T00:00:00+09:00'); // Nov 20 23:59 is included
     const button = document.getElementById('survey-launch-button');
     const notice = document.getElementById('survey-lock-notice');
@@ -134,13 +134,13 @@
       const closed = now >= closesAt;
       button.disabled = upcoming || closed;
       button.setAttribute('aria-label', upcoming ? '만족도 조사 시작 전 잠금' : closed ? '만족도 조사 접수 마감' : '만족도 조사 페이지로 이동');
-      button.innerHTML = upcoming ? '11월 12일 16:00 오픈 예정 <span aria-hidden="true">🔒</span>' : closed ? '만족도 조사 마감 <span aria-hidden="true">🔒</span>' : '만족도 조사 페이지로 이동 <span aria-hidden="true">→</span>';
-      notice.textContent = upcoming ? '🔒 만족도 조사는 2026년 11월 12일(목) 16:00부터 참여할 수 있습니다.' : closed ? '2026 SAVE THE MOVE 만족도 조사는 11월 20일(금) 23:59에 마감되었습니다.' : '만족도 조사 기간: 11월 12일(목) 16:00 ~ 11월 20일(금) 23:59';
+      button.innerHTML = upcoming ? '11월 12일 15:30 오픈 예정 <span aria-hidden="true">🔒</span>' : closed ? '만족도 조사 마감 <span aria-hidden="true">🔒</span>' : '만족도 조사 페이지로 이동 <span aria-hidden="true">→</span>';
+      notice.textContent = upcoming ? '🔒 만족도 조사는 2026년 11월 12일(목) 15:30부터 참여할 수 있습니다.' : closed ? '2026 SAVE THE MOVE 만족도 조사는 11월 20일(금) 23:59에 마감되었습니다.' : '만족도 조사 기간: 11월 12일(목) 15:30 ~ 11월 20일(금) 23:59';
       notice.style.color = upcoming || closed ? '#b51f16' : '#176a44';
     }
     button.addEventListener('click', () => {
       if (Date.now() < opensAt || Date.now() >= closesAt) return;
-      window.location.href = 'survey/?v=20261110-closefix';
+      window.location.href = 'survey/?v=20261111-open1530';
     });
     updateSurveyAvailability();
     setInterval(updateSurveyAvailability, 10000);
