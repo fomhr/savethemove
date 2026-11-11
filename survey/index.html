@@ -9,13 +9,13 @@
 </head>
 <body>
 <header class="hero"><div class="hero-inner"><h1>2026 SAVE THE MOVE 실천사례공유회</h1><p class="hero-tagline">아동을 지키는 실천, 빛나는 현장의 기록</p><h2 class="hero-subtitle">만족도 조사</h2></div></header>
-<main class="wrap"><div class="panel"><div class="progress-row"><span id="stepCounter">오픈 예정</span><span id="percent">2026.11.12 · 16:00</span></div><div class="track"><div class="fill" id="progress"></div></div><div id="content"><div class="stephead">만족도 조사 오픈 예정</div><div class="notice" role="status">🔒 만족도 조사는 2026년 11월 12일(목) 오후 4시(한국시간)부터 참여할 수 있습니다.</div><p class="step-desc">행사에 함께해 주셔서 감사합니다. 지정된 시간부터 설문에 참여하실 수 있습니다.</p></div><div class="controls" id="survey-controls" hidden><button type="button" class="btn" id="prev" disabled>이전</button><button type="button" class="btn primary" id="next" disabled>다음</button></div><div id="status" class="status" role="status" aria-live="polite"></div></div><div class="footer-note">익명 설문 · SAVE THE MOVE</div></main>
+<main class="wrap"><div class="panel"><div class="progress-row"><span id="stepCounter">오픈 예정</span><span id="percent">2026.11.12 · 15:30</span></div><div class="track"><div class="fill" id="progress"></div></div><div id="content"><div class="stephead">만족도 조사 오픈 예정</div><div class="notice" role="status">🔒 만족도 조사는 2026년 11월 12일(목) 오후 3시 30분(한국시간)부터 참여할 수 있습니다.</div><p class="step-desc">행사에 함께해 주셔서 감사합니다. 지정된 시간부터 설문에 참여하실 수 있습니다.</p></div><div class="controls" id="survey-controls" hidden><button type="button" class="btn" id="prev" disabled>이전</button><button type="button" class="btn primary" id="next" disabled>다음</button></div><div id="status" class="status" role="status" aria-live="polite"></div></div><div class="footer-note">익명 설문 · SAVE THE MOVE</div></main>
 <script>
 'use strict';
 // [설정 1] 배포 관리에서 복사한 /exec 주소. 현재 전달받은 주소를 유지했습니다.
 // 로그인 화면으로 이동하면 Apps Script 배포의 접근 권한을 먼저 확인하세요.
 const SUBMISSION_ENDPOINT = 'https://script.google.com/a/macros/sc.or.kr/s/AKfycbwCgwUEfsqaJJLs3PM_gz3xXrhBWDjfpAT0Hgfoe_3qjPKu86xWxIKK3dz0gKsbfaQI/exec'; // 배포된 Apps Script /exec URL 설정
-const SURVEY_OPENS_AT = Date.parse('2026-11-12T16:00:00+09:00');
+const SURVEY_OPENS_AT = Date.parse('2026-11-12T15:30:00+09:00');
 const SURVEY_CLOSES_AT = Date.parse('2026-11-21T00:00:00+09:00'); // Nov 20 23:59:59 KST is the last accepted second
 const surveyIsOpen = () => Date.now() >= SURVEY_OPENS_AT && Date.now() < SURVEY_CLOSES_AT;
 const SCALE_5=['전혀 그렇지 않다','그렇지 않다','보통이다','그렇다','매우 그렇다'];
@@ -72,9 +72,9 @@ function render(){
    $('next').disabled = true;
    $('prev').disabled = true;
    $('stepCounter').textContent = '오픈 예정';
-   $('percent').textContent = '2026.11.12 · 16:00';
+   $('percent').textContent = '2026.11.12 · 15:30';
    $('progress').style.width = '0%';
-   $('content').innerHTML = '<div class="stephead">만족도 조사 오픈 예정</div><div class="notice" role="status">🔒 만족도 조사는 2026년 11월 12일(목) 오후 4시(한국시간)부터 참여할 수 있습니다.</div><p class="step-desc">행사에 함께해 주셔서 감사합니다. 지정된 시간부터 설문에 참여하실 수 있습니다.</p>';
+   $('content').innerHTML = '<div class="stephead">만족도 조사 오픈 예정</div><div class="notice" role="status">🔒 만족도 조사는 2026년 11월 12일(목) 오후 3시 30분(한국시간)부터 참여할 수 있습니다.</div><p class="step-desc">행사에 함께해 주셔서 감사합니다. 지정된 시간부터 설문에 참여하실 수 있습니다.</p>';
    $('prev').style.display = 'none';
    $('next').style.display = 'none';
    $('status').textContent = '';
@@ -130,6 +130,6 @@ async function submit(){
    $('status').classList.add('warning');btn.disabled=false;$('prev').disabled=false;
  }
 }
-$('prev').addEventListener('click',()=>{if(!surveyIsOpen()){render();return;}if(stepIndex>0){stepIndex--;render();}});$('next').addEventListener('click',()=>{if(!surveyIsOpen()){render();return;}const st=steps()[stepIndex];if(st.key==='review'){submit();return;}if(!validate())return;stepIndex++;render();});render();setInterval(()=>{if(!surveyIsOpen()||$('percent').textContent==='2026.11.12 · 16:00')render();},10000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)render();});
+$('prev').addEventListener('click',()=>{if(!surveyIsOpen()){render();return;}if(stepIndex>0){stepIndex--;render();}});$('next').addEventListener('click',()=>{if(!surveyIsOpen()){render();return;}const st=steps()[stepIndex];if(st.key==='review'){submit();return;}if(!validate())return;stepIndex++;render();});render();setInterval(()=>{if(!surveyIsOpen()||$('percent').textContent==='2026.11.12 · 15:30')render();},10000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)render();});
 </script>
 </body></html>
