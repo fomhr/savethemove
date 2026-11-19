@@ -26,7 +26,7 @@
     const gasApplied=Number(answers.C27)>0;
     const internal=Array.isArray(answers.C25)&&answers.C25.some(x=>!noneOption(x));
     if(c.includes("법인 교육 참여")&&!familyEdu)return false;
-    if(c.includes("적용 가정 1 이상")&&!familyApplied)return false;
+    if((c.includes("적용 사례 1 이상")||c.includes("적용 가정 1 이상"))&&!familyApplied)return false;
     if(c.includes("GAS 적용 1사례 이상")&&!gasApplied)return false;
     if(c.includes("팀장 슈퍼비전 경험자")&&!(Array.isArray(answers.C25)&&answers.C25.includes("팀장 슈퍼비전")))return false;
     if(c.includes("법인 교육 또는 내부 학습 경험자")&&answers.C24!=="예"&&!internal)return false;
@@ -61,7 +61,7 @@
     const textVal=String(answers[id]??"");
     const manual=countModes[id]==="over"||(/^\d+$/.test(textVal)&&Number(textVal)>10);
     const selected=manual?"over":textVal;
-    const maxLabel=unit==="회"?"회":"사례/건";
+    const maxLabel=unit==="회"?"회":"사례";
     const start=id==="C07-MAX"?1:0;
     const opts=[["","선택해 주세요"]];
     if(start===0)opts.push(["0","없음"]);
@@ -78,9 +78,13 @@
     let html=`<section class="question" id="question-${esc(q.id)}"><h3 class="question-title"><span class="qnum">${questionNo(q)}.</span>${esc(q.question)}${note}</h3>`;
     if(isBundle(q)){
       if(q.note)html+=`<p class="field-note">${esc(q.note)}</p>`;
-      html+=`<div class="count-fields">${q.fields.map(f=>countHtml(f.key,f.label,f.unit,f.label)).join("")}</div>`;
+      if(q.fields.some(f=>f.group)){
+        const labels={total:"전체 활용",deep:"심층사례관리강화사업",general:"일반 사례관리"};
+        const groupIds=[...new Set(q.fields.map(f=>f.group))];
+        html+=`<div class="count-groups">${groupIds.map(group=>`<div class="count-pair-group"><div class="count-pair-heading">${esc(labels[group]||group)}</div><div class="count-pair-grid">${q.fields.filter(f=>f.group===group).map(f=>countHtml(f.key,f.label,f.unit,f.label)).join("")}</div></div>`).join("")}</div>`;
+      }else html+=`<div class="count-fields">${q.fields.map(f=>countHtml(f.key,f.label,f.unit,f.label)).join("")}</div>`;
     }else if(num){
-      const unit=/회|횟수/.test(q.question)?"회":"사례/건";
+      const unit=/회|횟수/.test(q.question)?"회":"사례";
       html+=countHtml(q.id,"",unit,q.question);
     }
         else if(long||opts.length===0)html+=`<textarea class="textinput" rows="4" data-entry="${esc(q.id)}" placeholder="구체적으로 작성해 주세요" aria-label="${esc(q.question)}">${esc(val??"")}</textarea>`;
@@ -97,7 +101,7 @@
       html+=`<div class="followup"><label for="other-${esc(q.id)}">기타 내용을 작성해 주세요.</label><textarea id="other-${esc(q.id)}" class="textinput" rows="2" data-extra="${esc(q.id)}" placeholder="구체적인 내용을 입력해 주세요">${esc(answers[q.id+"__other"]??"")}</textarea></div>`;
     }
     if(multi&&q.reason){
-      html+=`<div class="followup"><label for="reason-${esc(q.id)}">선택한 항목의 구체적인 사유를 작성해 주세요.</label><textarea id="reason-${esc(q.id)}" class="textinput" rows="3" data-reason="${esc(q.id)}" placeholder="선택한 이유나 관련 경험을 구체적으로 입력해 주세요">${esc(answers[q.id+"__reason"]??"")}</textarea></div>`;
+      html+=`<div class="followup"><label for="reason-${esc(q.id)}">${esc(q.reasonLabel||"선택한 항목의 구체적인 사유를 작성해 주세요.")}</label><textarea id="reason-${esc(q.id)}" class="textinput" rows="3" data-reason="${esc(q.id)}" placeholder="선택한 이유나 관련 경험을 구체적으로 입력해 주세요">${esc(answers[q.id+"__reason"]??"")}</textarea></div>`;
     }
     html+=`<div class="error hidden" id="error-${esc(q.id)}" role="alert"></div></section>`;
     return html;
@@ -134,20 +138,24 @@
     if(isMulti(q)&&q.reason&&!String(answers[q.id+"__reason"]??"").trim())return "선택한 사유를 입력해 주세요.";
     if(q.id==="C05-C07"){
       const meetings=Number(answers.C05),cases=Number(answers.C06),repeat=Number(answers.C07);
-      if(repeat>cases)return "2회 이상 적용한 가정 수가 전체 적용 가정 수를 초과할 수 없습니다.";
-      if(meetings<cases)return "총 회의 횟수는 적용 가정 수보다 적을 수 없습니다.";
-      if(meetings<cases+repeat)return "반복 적용 가정 수를 고려할 때 총 회의 횟수가 부족합니다.";
+      if(repeat>cases)return "2회 이상 진행한 사례 수가 전체 진행 사례 수를 초과할 수 없습니다.";
+      if(meetings<cases)return "총 진행 횟수는 진행 사례 수보다 적을 수 없습니다.";
+      if(meetings<cases+repeat)return "반복 진행 사례 수를 고려할 때 총 진행 횟수가 부족합니다.";
     }
     if(q.id==="C07-MAX"){
-      if(Number(a)>Number(answers.C05))return "한 가정의 최대 회의 횟수는 전체 회의 횟수를 초과할 수 없습니다.";
-      if(Number(answers.C07)>0&&Number(a)<2)return "2회 이상 반복 적용 가정이 있으므로 최소 2회 이상이어야 합니다.";
-      if(Number(answers.C07)===0&&Number(a)>1)return "2회 이상 적용 가정이 없는 경우 최대 지원 횟수는 1회입니다.";
+      if(Number(a)>Number(answers.C05))return "한 사례의 최대 회의 횟수는 전체 진행 횟수를 초과할 수 없습니다.";
+      if(Number(answers.C07)>0&&Number(a)<2)return "2회 이상 반복 진행 사례가 있으므로 최소 2회 이상이어야 합니다.";
+      if(Number(answers.C07)===0&&Number(a)>1)return "2회 이상 반복 진행 사례가 없는 경우 최대 진행 횟수는 1회입니다.";
     }
-    if(q.id==="C27-C31"){
-      const total=Number(answers.C28), cases=Number(answers.C27),deep=Number(answers.C29),general=Number(answers.C30),finished=Number(answers.C31);
-      if(total<cases)return "GAS 실행 횟수는 적용 총 사례 수보다 적을 수 없습니다.";
-      if(finished>cases)return "사후 평가 완료 사례 수는 적용 총 사례 수를 초과할 수 없습니다.";
-      if(deep+general!==total)return "심층사업·일반 사례관리 실행 횟수의 합계가 총 실행 횟수와 일치해야 합니다.";
+    if(q.id==="C27-C30"){
+      const totalCases=Number(answers.C27),totalTimes=Number(answers.C28);
+      const deepCases=Number(answers["C29-CASE"]),deepTimes=Number(answers.C29);
+      const generalCases=Number(answers["C30-CASE"]),generalTimes=Number(answers.C30);
+      if(totalTimes<totalCases)return "전체 적용 횟수는 전체 적용 사례 수보다 적을 수 없습니다.";
+      if(deepTimes<deepCases)return "심층사례관리강화사업의 적용 횟수는 적용 사례 수보다 적을 수 없습니다.";
+      if(generalTimes<generalCases)return "일반 사례관리의 적용 횟수는 적용 사례 수보다 적을 수 없습니다.";
+      if(deepCases>totalCases||generalCases>totalCases)return "각 과정의 적용 사례 수는 전체 적용 사례 수를 초과할 수 없습니다.";
+      if(deepTimes+generalTimes!==totalTimes)return "심층사업과 일반 사례관리 적용 횟수의 합계가 전체 적용 횟수와 일치해야 합니다.";
     }
     return "";
   }
