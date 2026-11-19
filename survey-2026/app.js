@@ -11,6 +11,8 @@
   const esc=value=>String(value??"").replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
   const isMulti=q=>/복수선택|중복선택/.test(q.type);
   const isNumeric=q=>/숫자|정수/.test(q.type);
+  const isBundle=q=>q.type==="복합 집계"&&Array.isArray(q.fields);
+  const fieldQuestion=id=>QUESTIONS.find(q=>q.id===id||(q.fields||[]).some(f=>f.key===id));
   const isLong=q=>/서술|장문/.test(q.type);
   const maxChoices=q=>Number((q.type.match(/최대\s*(\d+)/)||[])[1]||999);
   const noneOption=s=>["없음","경험 없음","참여한 적 없음","별도 운영 없음","어려움 없음"].includes(s);
@@ -54,21 +56,34 @@
     if(Array.isArray(a))return a.join(", ");
     return a==null?"":String(a);
   }
+
+  function countHtml(id,label,unit,question){
+    const textVal=String(answers[id]??"");
+    const manual=countModes[id]==="over"||(/^\d+$/.test(textVal)&&Number(textVal)>10);
+    const selected=manual?"over":textVal;
+    const maxLabel=unit==="회"?"회":"사례/건";
+    const start=id==="C07-MAX"?1:0;
+    const opts=[["","선택해 주세요"]];
+    if(start===0)opts.push(["0","없음"]);
+    for(let i=Math.max(1,start);i<=10;i++)opts.push([String(i),i+" "+maxLabel]);
+    opts.push(["over","10 "+maxLabel+" 초과(직접 입력)"]);
+    const input=opts.map(([v,n])=>`<option value="${esc(v)}" ${selected===v?"selected":""}>${esc(n)}</option>`).join("");
+    const manualInput=manual?`<div class="count-manual"><input class="textinput" type="number" min="11" step="1" inputmode="numeric" data-count-input="${esc(id)}" value="${esc(Number(textVal)>10?textVal:"")}" placeholder="11 이상 직접 입력" aria-label="${esc(label)} 10 초과 입력"></div>`:"";
+    return `<div class="count-field"><label class="count-label" for="count-${esc(id)}">${esc(label)}</label><select class="textinput count-select" id="count-${esc(id)}" data-count-select="${esc(id)}" aria-label="${esc(question||label)}">${input}</select>${manualInput}</div>`;
+  }
   function questionHtml(q){
     const multi=isMulti(q),num=isNumeric(q),long=isLong(q),opts=q.choices||[];
     const val=answers[q.id],selection=Array.isArray(val)?val:val==null?[]:[val];
     const note=multi?` <span class="multi-note">(${maxChoices(q)===999?"복수선택":"복수선택 · 최대 "+maxChoices(q)+"개"})</span>`:"";
     let html=`<section class="question" id="question-${esc(q.id)}"><h3 class="question-title"><span class="qnum">${questionNo(q)}.</span>${esc(q.question)}${note}</h3>`;
-    if(num){
-      const unit=/가정/.test(q.question)?"가정":/사례/.test(q.question)?"사례":/건/.test(q.question)?"건":"회";
-      const textVal=String(val??"");
-      const manual=countModes[q.id]==="over"||(/^\d+$/.test(textVal)&&Number(textVal)>10);
-      const selected=manual?"over":textVal;
-      const options=[["","선택해 주세요"],["0","없음"],...Array.from({length:10},(_,i)=>[String(i+1),String(i+1)+unit]),["over","10"+unit+" 초과(직접 입력)"]];
-      html+=`<select class="textinput count-select" data-count-select="${esc(q.id)}" aria-label="${esc(q.question)}">${options.map(([value,label])=>`<option value="${esc(value)}" ${selected===value?"selected":""}>${esc(label)}</option>`).join("")}</select>`;
-      if(manual)html+=`<div class="count-manual"><input class="textinput" type="number" min="11" step="1" inputmode="numeric" data-count-input="${esc(q.id)}" value="${esc(Number(textVal)>10?textVal:"")}" placeholder="11 이상 직접 입력" aria-label="${esc(q.question)} 10 초과 입력"></div>`;
+    if(isBundle(q)){
+      if(q.note)html+=`<p class="field-note">${esc(q.note)}</p>`;
+      html+=`<div class="count-fields">${q.fields.map(f=>countHtml(f.key,f.label,f.unit,f.label)).join("")}</div>`;
+    }else if(num){
+      const unit=/가정|사례|건/.test(q.question)?"사례/건":"회";
+      html+=countHtml(q.id,"응답",unit,q.question);
     }
-    else if(long||opts.length===0)html+=`<textarea class="textinput" rows="4" data-entry="${esc(q.id)}" placeholder="구체적으로 작성해 주세요" aria-label="${esc(q.question)}">${esc(val??"")}</textarea>`;
+        else if(long||opts.length===0)html+=`<textarea class="textinput" rows="4" data-entry="${esc(q.id)}" placeholder="구체적으로 작성해 주세요" aria-label="${esc(q.question)}">${esc(val??"")}</textarea>`;
     else {
       const scale=/5점/.test(q.type);
       html+=`<div class="${scale?"scale":"options"}">`;
@@ -97,10 +112,18 @@
   }
   function check(q){
     const a=answers[q.id];
-    if(isNumeric(q)){
-      if(a==null||String(a).trim()==="")return "필수 응답입니다. 해당 실적이 없으면 0을 입력해 주세요.";
+    if(isBundle(q)){
+      for(const field of q.fields){
+        const value=answers[field.key];
+        if(value==null||String(value).trim()==="")return "필수 응답입니다. '"+field.label+"' 항목을 선택해 주세요.";
+        if(!/^\d+$/.test(String(value))||!Number.isSafeInteger(Number(value)))return "'"+field.label+"' 항목에 0 이상의 정수를 입력해 주세요.";
+        if(countModes[field.key]==="over"&&Number(value)<=10)return "'"+field.label+"' 항목은 11 이상 입력해 주세요.";
+      }
+    }else if(isNumeric(q)){
+      if(a==null||String(a).trim()==="")return "필수 응답입니다. 해당 실적이 없으면 '없음'을 선택해 주세요.";
       if(!/^\d+$/.test(String(a))||!Number.isSafeInteger(Number(a)))return "0 이상의 정수를 입력해 주세요.";
-      if(countModes[q.id]==="over"&&Number(a)<=10)return "10을 초과하는 횟수·건수를 입력해 주세요.";
+      if(countModes[q.id]==="over"&&Number(a)<=10)return "11 이상 입력해 주세요.";
+      if(q.id==="C07-MAX"&&Number(a)<1)return "가족팀회의를 적용한 경우 최소 1회 이상을 선택해 주세요.";
     }else if(isMulti(q)){
       if(!Array.isArray(a)||a.length===0)return "필수 응답입니다. 항목을 선택해 주세요.";
       if(a.length>maxChoices(q))return "최대 "+maxChoices(q)+"개까지 선택할 수 있습니다.";
@@ -109,9 +132,23 @@
     }else if(!String(a??"").trim())return "필수 응답입니다. 항목을 선택해 주세요.";
     if(hasOther(q)&&selectedOther(q)&&!String(answers[q.id+"__other"]??"").trim())return "기타 내용을 입력해 주세요.";
     if(isMulti(q)&&q.reason&&!String(answers[q.id+"__reason"]??"").trim())return "선택한 사유를 입력해 주세요.";
-    if(q.id==="C07"&&Number(a)>Number(answers.C06))return "2회 이상 적용 가정 수는 전체 적용 가정 수를 초과할 수 없습니다.";
-    if(q.id==="C31"&&Number(a)>Number(answers.C27))return "평가 완료 사례 수는 전체 적용 사례 수를 초과할 수 없습니다.";
-    if(q.id==="C30"&&["C28","C29","C30"].every(id=>/^\d+$/.test(String(answers[id]??"")))&&Number(answers.C29)+Number(answers.C30)!==Number(answers.C28))return "심층사업 실행 건수와 일반 사례관리 실행 건수의 합계가 전체 실행 건수와 일치해야 합니다.";
+    if(q.id==="C05-C07"){
+      const meetings=Number(answers.C05),cases=Number(answers.C06),repeat=Number(answers.C07);
+      if(repeat>cases)return "2회 이상 적용한 가정 수가 전체 적용 가정 수를 초과할 수 없습니다.";
+      if(meetings<cases)return "총 회의 횟수는 적용 가정 수보다 적을 수 없습니다.";
+      if(meetings<cases+repeat)return "반복 적용 가정 수를 고려할 때 총 회의 횟수가 부족합니다.";
+    }
+    if(q.id==="C07-MAX"){
+      if(Number(a)>Number(answers.C05))return "한 가정의 최대 회의 횟수는 전체 회의 횟수를 초과할 수 없습니다.";
+      if(Number(answers.C07)>0&&Number(a)<2)return "2회 이상 반복 적용 가정이 있으므로 최소 2회 이상이어야 합니다.";
+      if(Number(answers.C07)===0&&Number(a)>1)return "2회 이상 적용 가정이 없는 경우 최대 지원 횟수는 1회입니다.";
+    }
+    if(q.id==="C27-C31"){
+      const total=Number(answers.C28), cases=Number(answers.C27),deep=Number(answers.C29),general=Number(answers.C30),finished=Number(answers.C31);
+      if(total<cases)return "GAS 실행 횟수는 적용 총 사례 수보다 적을 수 없습니다.";
+      if(finished>cases)return "사후 평가 완료 사례 수는 적용 총 사례 수를 초과할 수 없습니다.";
+      if(deep+general!==total)return "심층사업·일반 사례관리 실행 횟수의 합계가 총 실행 횟수와 일치해야 합니다.";
+    }
     return "";
   }
   function validateCurrent(){
@@ -155,7 +192,7 @@
           <li>응답은 익명으로 수집합니다.</li>
         </ul>
       </div>
-      <div class="note">2023~2026년 활용 경험을 기준으로 응답해 주세요. 적용 경험이 없는 경우 해당 실적에서 ‘없음’을 선택하면 관련 문항이 자동으로 제외됩니다.</div>
+      <div class="note">전체 문항 수는 <strong>${QUESTIONS.length}문항</strong>입니다. 응답 조건에 따라 일부 문항은 제외될 수 있습니다. 시간이 다소 걸리더라도 향후 법인 지원 및 기관 자체 운영 방향을 정하는 데 도움이 되도록 각 문항에 최대한 상세히 답변해 주시기 바랍니다.</div>
     `;
     $("previous").disabled=true;
     $("next").textContent="설문 시작";
@@ -167,7 +204,7 @@
     let out=`<h2 class="area">응답 확인</h2><h3 class="section">작성한 내용을 확인해 주세요.</h3><p class="description">이전 버튼으로 수정할 수 있습니다. 아래 버튼은 응답 파일을 내려받으며, 온라인 서버로 전송하지 않습니다.</p>`;
     out+=`<div class="summary">`;
     qs.forEach(q=>{
-      let value=answerLabel(q);
+      let value=isBundle(q)?q.fields.map(f=>f.label+": "+(answers[f.key]??"")+" "+f.unit).join("\n"):answerLabel(q);
       if(hasOther(q)&&selectedOther(q))value+="\n기타: "+(answers[q.id+"__other"]||"");
       if(isMulti(q)&&q.reason)value+="\n선택 사유: "+(answers[q.id+"__reason"]||"");
       out+=`<div class="summary-row"><div class="summary-title">${questionNo(q)}. ${esc(q.question)}</div><div class="summary-answer">${esc(value)}</div></div>`;
@@ -204,7 +241,7 @@
     }
     const data={schema:"FAMILY_GAS_2026_v3",role,exportedAt:new Date().toISOString(),source:"응답 파일(서버 미연동)",answers:{}};
     for(const q of visible()){
-      data.answers[q.id]=answers[q.id];
+      if(isBundle(q)){for(const field of q.fields)data.answers[field.key]=answers[field.key];}else data.answers[q.id]=answers[q.id];
       if(hasOther(q)&&selectedOther(q))data.answers[q.id+"__other"]=answers[q.id+"__other"];
       if(isMulti(q)&&q.reason)data.answers[q.id+"__reason"]=answers[q.id+"__reason"];
     }
@@ -224,7 +261,8 @@
     if(t.dataset.entry||t.dataset.countInput)answers[id]=t.value;
     if(t.dataset.extra)answers[id+"__other"]=t.value;
     if(t.dataset.reason)answers[id+"__reason"]=t.value;
-    setError(id,"");
+    const parent=fieldQuestion(id);
+    setError(parent?.id||id,"");
   });
   document.addEventListener("change",e=>{
     const t=e.target;
