@@ -57,3 +57,13 @@ input[type=number].textinput{max-width:260px}
 .page-links a:hover{background:var(--pale);border-color:var(--red)}
 .hidden{display:none!important}
 @media(max-width:620px){.hero-inner{padding:22px 18px}.wrap{padding:0 12px;margin-top:14px}.panel{border-radius:14px;padding:19px 18px}.options{grid-template-columns:1fr}.scale{gap:4px}.scale .option{min-height:93px;padding:9px 3px;font-size:10px}.section{font-size:22px}.controls .btn{padding:12px 16px}.followup{padding:14px}}
+
+.guide-section{border-top:1px solid var(--line);padding:23px 0}
+.guide-section:first-of-type{margin-top:18px}
+.guide-title{font-size:17px;letter-spacing:-.02em;margin:0 0 12px;font-weight:800}
+.guide-date{font-size:16px;font-weight:700;margin:0;color:var(--ink)}
+.guide-list{margin:0;padding-left:21px;color:#4b5561;line-height:1.95;font-size:14px}
+.guide-list li{margin:5px 0}
+.count-select{max-width:290px;cursor:pointer;min-height:48px;appearance:auto}
+.count-manual{margin-top:11px}
+.count-manual .textinput{max-width:290px}
