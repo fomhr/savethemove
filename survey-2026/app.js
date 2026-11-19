@@ -5,6 +5,8 @@
   const answers={};
   let pageIndex=0;
   let review=false;
+  let intro=true;
+  const countModes={};
   const $=id=>document.getElementById(id);
   const esc=value=>String(value??"").replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
   const isMulti=q=>/복수선택|중복선택/.test(q.type);
@@ -57,7 +59,15 @@
     const val=answers[q.id],selection=Array.isArray(val)?val:val==null?[]:[val];
     const note=multi?` <span class="multi-note">(${maxChoices(q)===999?"복수선택":"복수선택 · 최대 "+maxChoices(q)+"개"})</span>`:"";
     let html=`<section class="question" id="question-${esc(q.id)}"><h3 class="question-title"><span class="qnum">${questionNo(q)}.</span>${esc(q.question)}${note}</h3>`;
-    if(num)html+=`<input class="textinput" type="number" min="0" step="1" inputmode="numeric" data-entry="${esc(q.id)}" value="${esc(val??"")}" placeholder="미실시 시 0 입력" aria-label="${esc(q.question)}">`;
+    if(num){
+      const unit=/가정/.test(q.question)?"가정":/사례/.test(q.question)?"사례":/건/.test(q.question)?"건":"회";
+      const textVal=String(val??"");
+      const manual=countModes[q.id]==="over"||(/^\d+$/.test(textVal)&&Number(textVal)>10);
+      const selected=manual?"over":textVal;
+      const options=[["","선택해 주세요"],["0","없음"],...Array.from({length:10},(_,i)=>[String(i+1),String(i+1)+unit]),["over","10"+unit+" 초과(직접 입력)"]];
+      html+=`<select class="textinput count-select" data-count-select="${esc(q.id)}" aria-label="${esc(q.question)}">${options.map(([value,label])=>`<option value="${esc(value)}" ${selected===value?"selected":""}>${esc(label)}</option>`).join("")}</select>`;
+      if(manual)html+=`<div class="count-manual"><input class="textinput" type="number" min="11" step="1" inputmode="numeric" data-count-input="${esc(q.id)}" value="${esc(Number(textVal)>10?textVal:"")}" placeholder="11 이상 직접 입력" aria-label="${esc(q.question)} 10 초과 입력"></div>`;
+    }
     else if(long||opts.length===0)html+=`<textarea class="textinput" rows="4" data-entry="${esc(q.id)}" placeholder="구체적으로 작성해 주세요" aria-label="${esc(q.question)}">${esc(val??"")}</textarea>`;
     else {
       const scale=/5점/.test(q.type);
@@ -90,6 +100,7 @@
     if(isNumeric(q)){
       if(a==null||String(a).trim()==="")return "필수 응답입니다. 해당 실적이 없으면 0을 입력해 주세요.";
       if(!/^\d+$/.test(String(a))||!Number.isSafeInteger(Number(a)))return "0 이상의 정수를 입력해 주세요.";
+      if(countModes[q.id]==="over"&&Number(a)<=10)return "10을 초과하는 횟수·건수를 입력해 주세요.";
     }else if(isMulti(q)){
       if(!Array.isArray(a)||a.length===0)return "필수 응답입니다. 항목을 선택해 주세요.";
       if(a.length>maxChoices(q))return "최대 "+maxChoices(q)+"개까지 선택할 수 있습니다.";
@@ -122,11 +133,34 @@
   }
   function progress(){
     const arr=groups();
-    const total=arr.length+1;
-    const current=review?total:Math.min(pageIndex+1,total);
+    const total=arr.length+2;
+    const current=intro?1:review?total:Math.min(pageIndex+2,total);
     $("stepCounter").textContent=`${current} / ${total} 단계`;
     $("percent").textContent=Math.round(current/total*100)+"%";
     $("progress").style.width=current/total*100+"%";
+  }
+  function renderIntro(){
+    $("content").innerHTML=`
+      <h2 class="area">설문 안내</h2>
+      <div class="guide-section">
+        <h3 class="guide-title">설문조사 기간</h3>
+        <p class="guide-date">2026년 11월 23일(월) ~ 12월 4일(금)</p>
+      </div>
+      <div class="guide-section">
+        <h3 class="guide-title">응답 안내</h3>
+        <ul class="guide-list">
+          <li>필수 항목은 모두 응답해야 다음 페이지로 이동할 수 있습니다.</li>
+          <li>이전 버튼을 눌러 응답을 수정할 수 있습니다.</li>
+          <li>적용 경험이 없는 경우 효과성 관련 문항은 자동으로 제외됩니다.</li>
+          <li>응답은 익명으로 수집합니다.</li>
+        </ul>
+      </div>
+      <div class="note">2023~2026년 활용 경험을 기준으로 응답해 주세요. 적용 경험이 없는 경우 해당 실적에서 ‘없음’을 선택하면 관련 문항이 자동으로 제외됩니다.</div>
+    `;
+    $("previous").disabled=true;
+    $("next").textContent="설문 시작";
+    $("status").textContent="";
+    progress();
   }
   function renderReview(){
     const qs=visible();
@@ -145,6 +179,7 @@
     progress();
   }
   function render(){
+    if(intro){renderIntro();return;}
     const arr=groups();
     if(!arr.length){$("content").textContent="설문을 표시할 수 없습니다.";return;}
     if(review){renderReview();return;}
@@ -184,15 +219,29 @@
   }
   document.addEventListener("input",e=>{
     const t=e.target;
-    const id=t.dataset.entry||t.dataset.extra||t.dataset.reason;
+    const id=t.dataset.entry||t.dataset.countInput||t.dataset.extra||t.dataset.reason;
     if(!id)return;
-    if(t.dataset.entry)answers[id]=t.value;
+    if(t.dataset.entry||t.dataset.countInput)answers[id]=t.value;
     if(t.dataset.extra)answers[id+"__other"]=t.value;
     if(t.dataset.reason)answers[id+"__reason"]=t.value;
     setError(id,"");
   });
   document.addEventListener("change",e=>{
     const t=e.target;
+    if(t.dataset.countSelect){
+      const id=t.dataset.countSelect;
+      const key=groups()[pageIndex]?.key||"";
+      if(t.value==="over"){
+        countModes[id]="over";
+        if(!(Number(answers[id])>10))answers[id]="";
+      }else{
+        countModes[id]="fixed";
+        answers[id]=t.value;
+      }
+      locatePrevious(key);
+      render();
+      return;
+    }
     if(!t.dataset.choice)return;
     const id=t.dataset.choice;
     const q=QUESTIONS.find(item=>item.id===id);
@@ -218,10 +267,12 @@
   });
   $("previous").addEventListener("click",()=>{
     if(review){review=false;pageIndex=groups().length-1;}
-    else if(pageIndex>0)pageIndex--;
+    else if(pageIndex===0)intro=true;
+    else pageIndex--;
     render();moveTop();
   });
   $("next").addEventListener("click",()=>{
+    if(intro){intro=false;render();moveTop();return;}
     if(review){exportData();return;}
     if(!validateCurrent())return;
     if(pageIndex>=groups().length-1)review=true;
