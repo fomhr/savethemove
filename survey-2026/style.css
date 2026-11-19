@@ -67,3 +67,10 @@ input[type=number].textinput{max-width:260px}
 .count-select{max-width:290px;cursor:pointer;min-height:48px;appearance:auto}
 .count-manual{margin-top:11px}
 .count-manual .textinput{max-width:290px}
+
+.persistent-guide{margin:-6px 0 23px;padding:12px 15px;background:#fff9f8;border:1px solid #f2d9d5;border-left:3px solid var(--red);border-radius:10px;font-size:13px;line-height:1.75;color:#5b626d}
+.persistent-guide strong{color:#ba2e25}
+.count-fields{display:grid;gap:19px;margin-top:10px}
+.count-field{max-width:100%}
+.count-label{display:block;font-weight:750;font-size:14px;margin-bottom:8px;color:#333943}
+.field-note{font-size:13px;color:#67717b;margin:0 0 13px}
