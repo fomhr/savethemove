@@ -69,7 +69,7 @@
     opts.push(["over","10 "+maxLabel+" 초과(직접 입력)"]);
     const input=opts.map(([v,n])=>`<option value="${esc(v)}" ${selected===v?"selected":""}>${esc(n)}</option>`).join("");
     const manualInput=manual?`<div class="count-manual"><input class="textinput" type="number" min="11" step="1" inputmode="numeric" data-count-input="${esc(id)}" value="${esc(Number(textVal)>10?textVal:"")}" placeholder="11 이상 직접 입력" aria-label="${esc(label)} 10 초과 입력"></div>`:"";
-    return `<div class="count-field"><label class="count-label" for="count-${esc(id)}">${esc(label)}</label><select class="textinput count-select" id="count-${esc(id)}" data-count-select="${esc(id)}" aria-label="${esc(question||label)}">${input}</select>${manualInput}</div>`;
+    return `<div class="count-field">${label?`<label class="count-label" for="count-${esc(id)}">${esc(label)}</label>`:""}<select class="textinput count-select" id="count-${esc(id)}" data-count-select="${esc(id)}" aria-label="${esc(question||label)}">${input}</select>${manualInput}</div>`;
   }
   function questionHtml(q){
     const multi=isMulti(q),num=isNumeric(q),long=isLong(q),opts=q.choices||[];
@@ -80,8 +80,8 @@
       if(q.note)html+=`<p class="field-note">${esc(q.note)}</p>`;
       html+=`<div class="count-fields">${q.fields.map(f=>countHtml(f.key,f.label,f.unit,f.label)).join("")}</div>`;
     }else if(num){
-      const unit=/가정|사례|건/.test(q.question)?"사례/건":"회";
-      html+=countHtml(q.id,"응답",unit,q.question);
+      const unit=/회|횟수/.test(q.question)?"회":"사례/건";
+      html+=countHtml(q.id,"",unit,q.question);
     }
         else if(long||opts.length===0)html+=`<textarea class="textinput" rows="4" data-entry="${esc(q.id)}" placeholder="구체적으로 작성해 주세요" aria-label="${esc(q.question)}">${esc(val??"")}</textarea>`;
     else {
@@ -192,7 +192,7 @@
           <li>응답은 익명으로 수집합니다.</li>
         </ul>
       </div>
-      <div class="note">전체 문항 수는 <strong>${QUESTIONS.length}문항</strong>입니다. 응답 조건에 따라 일부 문항은 제외될 수 있습니다. 시간이 다소 걸리더라도 향후 법인 지원 및 기관 자체 운영 방향을 정하는 데 도움이 되도록 각 문항에 최대한 상세히 답변해 주시기 바랍니다.</div>
+      <div class="note">본 조사는 총 <strong>${QUESTIONS.length}문항</strong>입니다. 실제 응답 문항 수는 교육·활용 경험에 따라 달라질 수 있습니다. 응답에 다소 시간이 걸리더라도 향후 법인 지원과 기관별 자체 운영 방향을 구체화하는 데 도움이 되도록 최대한 상세히 답변해 주시기 바랍니다.</div>
     `;
     $("previous").disabled=true;
     $("next").textContent="설문 시작";
