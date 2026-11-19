@@ -186,7 +186,7 @@
     pageIndex=Math.min(pageIndex,arr.length-1);
     const p=arr[pageIndex];
     $("content").innerHTML=`<h2 class="area">${esc(p.area)}</h2><h3 class="section">${esc(p.section)}</h3><p class="description">각 문항에 응답한 후 다음 단계로 이동해 주세요.</p>${p.questions.map(questionHtml).join("")}`;
-    $("previous").disabled=pageIndex===0;
+    $("previous").disabled=false;
     $("next").textContent=pageIndex===arr.length-1?"응답 확인":"다음";
     $("status").textContent="";
     progress();
