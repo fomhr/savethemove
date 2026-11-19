@@ -74,3 +74,12 @@ input[type=number].textinput{max-width:260px}
 .count-field{max-width:100%}
 .count-label{display:block;font-weight:750;font-size:14px;margin-bottom:8px;color:#333943}
 .field-note{font-size:13px;color:#67717b;margin:0 0 13px}
+
+/* GAS paired case/session inputs */
+.count-groups{display:grid;gap:16px;margin-top:14px}
+.count-pair-group{background:#fbfcfd;border:1px solid var(--line);padding:16px;border-radius:12px}
+.count-pair-heading{font-size:14px;font-weight:850;color:#343c47;margin-bottom:12px}
+.count-pair-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.count-pair-grid .count-select{max-width:100%;width:100%}
+.count-pair-grid .count-manual .textinput{max-width:100%}
+@media(max-width:520px){.count-pair-group{padding:13px}.count-pair-grid{gap:10px}.count-label{font-size:12px}.count-pair-grid .textinput{padding:10px 6px;font-size:12px}}
