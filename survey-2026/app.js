@@ -19,7 +19,13 @@
   const hasOther=q=>(q.choices||[]).includes("기타");
   const selectedOther=q=>isMulti(q)?(Array.isArray(answers[q.id])&&answers[q.id].includes("기타")):answers[q.id]==="기타";
   function eligible(q){
-    if(role!=="상담원")return true;
+    if(role==="팀장"){
+      const familyTracks=["실적 관리","둘 다"].includes(answers.M05);
+      const gasTracks=["실적 관리","둘 다"].includes(answers["M19-METHOD"]);
+      if(q.id==="M05-F1")return familyTracks;
+      if(q.id==="M19"||q.id==="M19-FREQ")return gasTracks;
+      return true;
+    }
     const c=q.condition||"";
     const familyEdu=Array.isArray(answers.C03)&&answers.C03.some(x=>/^202[3-6]년$/.test(x));
     const familyApplied=Number(answers.C06)>0;
@@ -79,7 +85,7 @@
     if(isBundle(q)){
       if(q.note)html+=`<p class="field-note">${esc(q.note)}</p>`;
       if(q.fields.some(f=>f.group)){
-        const labels={total:"전체 활용",deep:"심층사례관리강화사업",general:"일반 사례관리"};
+        const labels={total:"전체 적용",deep:"심층사례관리강화사업",general:"일반 사례관리"};
         const groupIds=[...new Set(q.fields.map(f=>f.group))];
         html+=`<div class="count-groups">${groupIds.map(group=>`<div class="count-pair-group"><div class="count-pair-heading">${esc(labels[group]||group)}</div><div class="count-pair-grid">${q.fields.filter(f=>f.group===group).map(f=>countHtml(f.key,f.label,f.unit,f.label)).join("")}</div></div>`).join("")}</div>`;
       }else html+=`<div class="count-fields">${q.fields.map(f=>countHtml(f.key,f.label,f.unit,f.label)).join("")}</div>`;
@@ -100,7 +106,7 @@
     if(hasOther(q)&&selectedOther(q)){
       html+=`<div class="followup"><label for="other-${esc(q.id)}">기타 내용을 작성해 주세요.</label><textarea id="other-${esc(q.id)}" class="textinput" rows="2" data-extra="${esc(q.id)}" placeholder="구체적인 내용을 입력해 주세요">${esc(answers[q.id+"__other"]??"")}</textarea></div>`;
     }
-    if(multi&&q.reason){
+    if(multi&&q.reason&&!(selection.length===1&&selection.every(noneOption))){
       html+=`<div class="followup"><label for="reason-${esc(q.id)}">${esc(q.reasonLabel||"선택한 항목의 구체적인 사유를 작성해 주세요.")}</label><textarea id="reason-${esc(q.id)}" class="textinput" rows="3" data-reason="${esc(q.id)}" placeholder="선택한 이유나 관련 경험을 구체적으로 입력해 주세요">${esc(answers[q.id+"__reason"]??"")}</textarea></div>`;
     }
     html+=`<div class="error hidden" id="error-${esc(q.id)}" role="alert"></div></section>`;
@@ -135,7 +141,7 @@
       if(!String(a??"").trim())return "필수 응답입니다. 내용을 입력해 주세요.";
     }else if(!String(a??"").trim())return "필수 응답입니다. 항목을 선택해 주세요.";
     if(hasOther(q)&&selectedOther(q)&&!String(answers[q.id+"__other"]??"").trim())return "기타 내용을 입력해 주세요.";
-    if(isMulti(q)&&q.reason&&!String(answers[q.id+"__reason"]??"").trim())return "선택한 사유를 입력해 주세요.";
+    if(isMulti(q)&&q.reason&&!(Array.isArray(a)&&a.length===1&&a.every(noneOption))&&!String(answers[q.id+"__reason"]??"").trim())return "선택한 사유를 입력해 주세요.";
     if(q.id==="C05-C07"){
       const meetings=Number(answers.C05),cases=Number(answers.C06),repeat=Number(answers.C07);
       if(repeat>cases)return "2회 이상 진행한 사례 수가 전체 진행 사례 수를 초과할 수 없습니다.";
@@ -200,7 +206,7 @@
           <li>응답은 익명으로 수집합니다.</li>
         </ul>
       </div>
-      <div class="note">본 조사는 총 <strong>${QUESTIONS.length}문항</strong>입니다. 실제 응답 문항 수는 교육·활용 경험에 따라 달라질 수 있습니다. 응답에 다소 시간이 걸리더라도 향후 법인 지원과 기관별 자체 운영 방향을 구체화하는 데 도움이 되도록 최대한 상세히 답변해 주시기 바랍니다.</div>
+      <div class="note">본 조사는 총 <strong>${QUESTIONS.length}문항</strong>입니다. 실제 응답 문항 수는 교육·적용 경험에 따라 달라질 수 있습니다. 응답에 다소 시간이 걸리더라도 향후 법인 지원과 기관별 자체 운영 방향을 구체화하는 데 도움이 되도록 최대한 상세히 답변해 주시기 바랍니다.</div>
     `;
     $("previous").disabled=true;
     $("next").textContent="설문 시작";
