@@ -226,7 +226,7 @@
     out+="</div>";
     $("content").innerHTML=out;
     $("previous").disabled=false;
-    $("next").textContent="응답 파일 저장";
+    $("next").textContent="응답 제출";
     progress();
   }
   function render(){
@@ -243,7 +243,8 @@
     progress();
   }
   function moveTop(){window.scrollTo({top:0,behavior:"smooth"});}
-  function exportData(){
+  let submissionId;
+  async function submitResponse(){
     const missing=visible().filter(q=>check(q));
     if(missing.length){
       review=false;
@@ -253,20 +254,34 @@
       validateCurrent();
       return;
     }
-    const data={schema:"FAMILY_GAS_2026_v3",role,exportedAt:new Date().toISOString(),source:"응답 파일(서버 미연동)",answers:{}};
+    const data={schema:"FAMILY_GAS_2026_v3",role,id:submissionId??=crypto.randomUUID(),answers:{}};
     for(const q of visible()){
       if(isBundle(q)){for(const field of q.fields)data.answers[field.key]=answers[field.key];}else data.answers[q.id]=answers[q.id];
       if(hasOther(q)&&selectedOther(q))data.answers[q.id+"__other"]=answers[q.id+"__other"];
-      if(isMulti(q)&&q.reason)data.answers[q.id+"__reason"]=answers[q.id+"__reason"];
+      if(isMulti(q)&&q.reason&&!(answers[q.id].length===1&&answers[q.id].every(noneOption)))data.answers[q.id+"__reason"]=answers[q.id+"__reason"];
     }
-    const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
-    const url=URL.createObjectURL(blob);
-    const link=document.createElement("a");
-    link.href=url;
-    link.download=`2026_가족팀회의_GAS_${role}_응답.json`;
-    document.body.appendChild(link);link.click();link.remove();
-    setTimeout(()=>URL.revokeObjectURL(url),1000);
-    $("status").textContent="응답 파일을 저장했습니다. 서버에는 전송되지 않았습니다.";
+    const next=$("next");
+    const previous=$("previous");
+    next.disabled=true;
+    previous.disabled=true;
+    $("status").textContent="응답을 제출하고 있습니다.";
+    try {
+      const response=await fetch("https://script.google.com/macros/s/AKfycbwLfMZYIszR9p2ZTo75O-hmUmE7dQZTYrME1kTBQwiGQgiPe9jg6xGAStNDYfG-Dk2c/exec",{
+        method:"POST",
+        credentials:"omit",
+        headers:{"Content-Type":"text/plain;charset=UTF-8"},
+        body:JSON.stringify(data),
+        signal:AbortSignal.timeout(25000)
+      });
+      const receipt=await response.json();
+      if(!response.ok||receipt.ok!==true||receipt.id!==data.id)throw new Error("Receipt unavailable");
+      $("status").textContent="응답이 제출되었습니다. 참여해 주셔서 감사합니다.";
+      next.textContent="제출 완료";
+    } catch {
+      $("status").textContent="제출 결과를 확인하지 못했습니다. 다시 제출해 주세요.";
+      next.disabled=false;
+      previous.disabled=false;
+    }
   }
   document.addEventListener("input",e=>{
     const t=e.target;
@@ -325,7 +340,7 @@
   });
   $("next").addEventListener("click",()=>{
     if(intro){intro=false;render();moveTop();return;}
-    if(review){exportData();return;}
+    if(review){submitResponse();return;}
     if(!validateCurrent())return;
     if(pageIndex>=groups().length-1)review=true;
     else pageIndex++;
