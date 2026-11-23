@@ -94,7 +94,7 @@
       const unit=/회|횟수/.test(q.question)?"회":"사례";
       html+=countHtml(q.id,"",unit,q.question);
     }
-    else if(long||opts.length===0)html+=`<label for="written-${esc(q.id)}">구체적으로 작성해 주세요.${requiredWriting}</label><textarea required id="written-${esc(q.id)}" class="textinput" rows="4" data-entry="${esc(q.id)}" placeholder="구체적으로 작성해 주세요" aria-label="${esc(q.question)}">${esc(val??"")}</textarea>`;
+    else if(long||opts.length===0)html+=`<label for="written-${esc(q.id)}">${requiredWriting}</label><textarea required id="written-${esc(q.id)}" class="textinput" rows="4" data-entry="${esc(q.id)}" aria-label="${esc(q.question)}">${esc(val??"")}</textarea>`;
     else {
       const scale=/5점/.test(q.type);
       html+=`<div class="${scale?"scale":"options"}">`;
