@@ -275,8 +275,16 @@
       });
       const receipt=await response.json();
       if(!response.ok||receipt.ok!==true||receipt.id!==data.id)throw new Error("Receipt unavailable");
-      $("status").textContent="응답이 제출되었습니다. 참여해 주셔서 감사합니다.";
-      next.textContent="제출 완료";
+      const completion=document.createElement("main");
+      completion.style.cssText="min-height:100vh;display:grid;place-items:center;padding:24px;text-align:center";
+      const message=document.createElement("h1");
+      message.tabIndex=-1;
+      message.style.cssText="margin:0;font-size:clamp(1.25rem,4vw,2rem);line-height:1.5;word-break:keep-all";
+      message.textContent="응답이 제출되었습니다. 참여해 주셔서 감사합니다.";
+      completion.append(message);
+      document.body.replaceChildren(completion);
+      window.scrollTo(0,0);
+      message.focus();
     } catch {
       $("status").textContent="제출 결과를 확인하지 못했습니다. 다시 제출해 주세요.";
       next.disabled=false;
