@@ -107,7 +107,7 @@
       html+=`<div class="followup"><label for="other-${esc(q.id)}">기타 내용을 작성해 주세요.</label><textarea id="other-${esc(q.id)}" class="textinput" rows="2" data-extra="${esc(q.id)}" placeholder="구체적인 내용을 입력해 주세요">${esc(answers[q.id+"__other"]??"")}</textarea></div>`;
     }
     if(multi&&q.reason&&!(selection.length===1&&selection.every(noneOption))){
-      html+=`<div class="followup"><label for="reason-${esc(q.id)}">${esc(q.reasonLabel||"선택한 항목의 구체적인 사유를 작성해 주세요.")}</label><textarea id="reason-${esc(q.id)}" class="textinput" rows="3" data-reason="${esc(q.id)}" placeholder="선택한 이유나 관련 경험을 구체적으로 입력해 주세요">${esc(answers[q.id+"__reason"]??"")}</textarea></div>`;
+      html+=`<div class="followup"><label for="reason-${esc(q.id)}">${esc(q.reasonLabel||"선택한 항목의 구체적인 사유를 작성해 주세요.")}${q.reasonLabel==="선택한 이유를 구체적으로 작성해 주세요."?' <span style="color:var(--red-dark);font-weight:700">*필수작성</span>':""}</label><textarea id="reason-${esc(q.id)}" class="textinput" rows="3" data-reason="${esc(q.id)}" placeholder="선택한 이유나 관련 경험을 구체적으로 입력해 주세요">${esc(answers[q.id+"__reason"]??"")}</textarea></div>`;
     }
     html+=`<div class="error hidden" id="error-${esc(q.id)}" role="alert"></div></section>`;
     return html;
