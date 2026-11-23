@@ -77,7 +77,7 @@
     const manualInput=manual?`<div class="count-manual"><input class="textinput" type="number" min="11" step="1" inputmode="numeric" data-count-input="${esc(id)}" value="${esc(Number(textVal)>10?textVal:"")}" placeholder="11 이상 직접 입력" aria-label="${esc(label)} 10 초과 입력"></div>`:"";
     return `<div class="count-field">${label?`<label class="count-label" for="count-${esc(id)}">${esc(label)}</label>`:""}<select class="textinput count-select" id="count-${esc(id)}" data-count-select="${esc(id)}" aria-label="${esc(question||label)}">${input}</select>${manualInput}</div>`;
   }
-  const requiredWriting = ' <span style="color:var(--red-dark);font-weight:700">*필수작성</span>';
+  const requiredWriting = ' <span style="color:var(--red-dark);font-weight:700">필수작성</span>';
   function questionHtml(q){
     const multi=isMulti(q),num=isNumeric(q),long=isLong(q),opts=q.choices||[];
     const val=answers[q.id],selection=Array.isArray(val)?val:val==null?[]:[val];
